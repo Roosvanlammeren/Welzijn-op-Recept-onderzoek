@@ -1,0 +1,48 @@
+*PSM1 = leeftijd, geslacht, inkomen, migratieachtergrond en huishoudgrootte
+use"DH_TOTAAL.dta", clear
+
+
+*var bewerken
+label define geslachtlbl 1"Man" 2"Vrouw"
+label values GBAGESLACHT geslachtlbl
+label var GBAGESLACHT "Geslacht (1=man 2=vrouw)"
+recode Migratieachtergrond (2/9=2)
+label define Migratielbl 1"Nee" 2"Ja"
+label values Migratieachtergrond Migratielbl
+label var Migratieachtergrond "Migratieachtergrond (1=Nee, 2=Ja)"
+recode Y22_INHP100GESTES_class (-3/-1 = .)
+label define inkomlbl 1 "Laag" 2 "Midden" 3 "Hoog"
+label values Y22_INHP100GESTES_class inkomlbl
+label var Y22_INHP100GESTES_class "Inkomen (1=Laag 2=Midden 3=Hoog)"
+label define hhcatlbl 1 "1 persoon" 2 "2 personen" 3 "3 of meer personen"
+label values Y22_INHAHL_Categorized hhcatlbl
+label var Y22_INHAHL_Categorized "Huishoudgrotte (categorisch, 1-2-3+)"
+
+*log regressie
+logit WoR_cases Age_2022 i.GBAGESLACHT i.Migratieachtergrond i.Y22_INHP100GESTES_class i.Y22_INHAHL_Categorized
+predict pscore, pr
+
+* Bereken de logit van de propensity score voor caliper-bepaling
+gen logit_ps = log(pscore/(1-pscore))
+sum logit_ps
+scalar sd_logit = r(sd)
+
+*Stel caliper in volgens Austin (0.2*SD)
+scalar caliper = 0.2*sd_logit
+display caliper 
+
+* de match
+psmatch2 WoR_cases (GBAGESLACHT Y22_INHP100GESTES_class Migratieachtergrond Y22_INHAHL_Categorized Age_2022), logit caliper (.23275318) neighbor(1)
+
+*selecteren van de studiepop. en control voor nieuwe dataset
+gen matched_control=(_treated==0 & inlist(_weight, 1,2))
+gen matched_case=(_treated ==1 & _weight==1)
+gen matched_all=matched_control | matched_case
+keep if matched_all==1
+
+*check
+pstest GBAGESLACHT Y22_INHP100GESTES_class Migratieachtergrond Y22_INHAHL_Categorized Age_2022, both graph
+
+twoway (kdensity pscore if WoR_cases==1) (kdensity pscore if WoR_cases==0)
+
+

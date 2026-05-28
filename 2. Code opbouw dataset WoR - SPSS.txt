@@ -1,0 +1,5836 @@
+* Encoding: windows-1252.
+
+*Dataset WoR gereed maken.
+GET FILE  "H:\Datavoorbereiding\NWA\Roos\WOR_WELZIJN\8636__WOR_240125_uploadCBS_ 21022025_CBKV1.sav".
+DATASET NAME WoR.
+
+
+* Welzijnsdata bewerken zodat er mee gerekend kan worden.
+DATASET ACTIVATE WoR.
+
+ALTER TYPE Geldigheidsdatumadres (edate10).
+
+ALTER TYPE Geboortedatum (sdate8).
+
+
+RECODE Geslacht (convert) ('m' = 1) ('v'=0) into nGeslacht.
+VALUE LABELS nGeslacht
+1 'Male'
+0 'Female'.
+EXECUTE.
+
+RECODE Bekend (convert) ('Ja' =1) ('Nee'=0) into nBekend.
+VALUE LABELS nBekend
+1 'Yes'
+0 'No'.
+EXECUTE.
+
+COMPUTE JaarBekend = number(Jaar, F4).
+EXECUTE.
+
+AUTORECODE Dienst_B/into nDienst_B/blank missing.
+EXECUTE.
+
+AUTORECODE Dienst_A/into nDienst_A/blank missing.
+EXECUTE.
+RECODE nDienst_A (1 2 3 = 1) (4 5 6 7 =2).
+EXECUTE.
+VALUE LABELS nDienst_A
+1 "Welzijn op Recept Loosduinen"
+2 "Welzijn op Recept Rubenshoek".
+EXECUTE.
+
+RECODE Nieuwevraag (convert)  ('Ja' =1) ('Nee'=0) into nNieuwvraag.
+VALUE LABELS nNieuwvraag
+1 'Yes'
+2 'No'.
+EXECUTE.
+
+COMPUTE nJaarterugkeer = number(Jaarterugkeer, F4).
+EXECUTE.
+
+AUTORECODE Dienst/into nDienst.
+EXECUTE.
+
+ALTER TYPE Casusstartdatum (edate10).
+
+
+AUTORECODE Verwijzinghuisarts/into nVerwijzinghuisarts/blank missing.
+EXECUTE.
+RECODE nVerwijzinghuisarts (1 = 6) (2 = 1) (3 4 9 10 = 2) (5 6 = 3) (7 = 4) (8 = 5).
+EXECUTE.
+VALUE LABELS nVerwijzinghuisarts
+1 "Actief zijn en meedoen"
+2 "Eenzaamheid en sociale contacten"
+3 "Geld en administratie"
+4 "Gezondheid en zorg"
+5 "Huisvesting"
+6 "Onbekend".
+EXECUTE.
+
+ALTER TYPE Datumintakewelzijn (edate10).
+
+
+AUTORECODE Hulpvraagwelzijn/into nHulpvraagwelzijn/blank missing.
+EXECUTE.
+RECODE nHulpvraagwelzijn (1 2= 1) (3 4 5= 2) (6 7 = 3) (8 9= 4) (10 11 = 5) (12 = 6) (13 = 7).
+EXECUTE.
+VALUE LABELS nHulpvraagwelzijn
+1 "Actief zijn en meedoen"
+2 "Geldzaken en regelgeving"
+3 "Gezondheid en zorg"
+4 "Huiselijke relaties en opvoeding"
+5 "Huisvesting en wonen"
+6 "Mentaal welbevinden en zingeving"
+7 "Vervoer en woonomgeving".
+EXECUTE.
+
+
+AUTORECODE Vraagverhelderingwelzijn/into nVraagverhelderingwelzijn/blank missing.
+EXECUTE.
+RECODE nVraagverhelderingwelzijn (1 = 1) (2 = 2) (3=3) (4 5 6=4) (7 8 = 5) (9=6) (10=7) (11=8) (12=9) (13=10) (14=11).
+EXECUTE.
+VALUE LABELS nVraagverhelderingwelzijn
+1 "Dagbesteding"
+2 "Eenzaamheid"
+3 "Financien/administratie"
+4 "Gezondheid geestelijk"
+5 "Huiselijke relaties"
+6 "Huisvesting"
+7 "Mobiliteit"
+8 "Opvoeding"
+9 "Respijtzorg"
+10 "Rouwverwerking"
+11 "Werk".
+EXECUTE. 
+
+AUTORECODE Recept/into nRecept/blank missing.
+EXECUTE.
+RECODE nRECEPT (1=1) (2=2) (3 4 5=3) (6=4) (7=5) (8=6) (9=7) (10=8) (11=9) (12=10).
+EXECUTE. 
+VALUE LABELS nRecept
+1 "(vrijwilligers)werk"
+2 "Financien en administratie"
+3 "Hulp en (vrijwillige) ondersteuning"
+4 "Maatje of buddy"
+5 "Ontdekken en doen"
+6 "Ontmoeten"
+7 "Opvoedondersteuning"
+8 "Verwijzing"
+9 "Voortijdig beindigd"
+10 "Zelfhulp en lotgenoten contact".
+EXECUTE.
+
+
+AUTORECODE Verwezennaarroute/into nVerwezennaarroute/blank missing.
+EXECUTE.
+
+ALTER TYPE Casuseinddatum (edate10).
+
+AUTORECODE Resultaatbijafsluiting/into nResultaatbijafsluiting/blank missing.
+EXECUTE.
+
+
+**** Nu blijkt dat resultaatbijafsluiting op  verschillende manieren is geschreven in de ruwe welzijnsdata. De categorien met dezelfde betekenis moet ik dus weer samen gaan voegen.
+RECODE nResultaatbijafsluiting (1 2 3 = 1) (4 5 = 2) (6 7 =3) (8 =4).
+EXECUTE.
+VALUE LABELS nResultaatbijafsluiting
+1 "Doelen behaald"
+2 "Doelen deels behaald"
+3 "Doelen niet behaald"
+4 "Hulpvraag veranderd".
+EXECUTE.
+
+AUTORECODE Redenafsluiting/into nRedenafsluiting/blank missing.
+EXECUTE.
+RECODE nRedenafsluiting (1 2 3 = 1) (4 =2) (5=3) (6 7 = 4) (8=5).
+EXECUTE.
+VALUE LABELS nRedenafsluiting
+1 "Dienstverlening afgerond"
+2 "Opname/doorverwijzing"
+3 "Vanwege overlijden"
+4 "Voortijdig op initiatief van klant"
+5 "Voortijdig op initiatief medewerker".
+EXECUTE.
+
+
+
+**********************************************************************************************************
+****************************Koppeling WoR aan CBS microdata*************************************
+**********************************************************************************************************
+*Stap 1: Adresobjectbus koppelen aan mijn WoR dataset (uniek gemaakt).
+*Eerst uniek maken en de mensen selecteren die gekoppeld zijn binnen CBS.
+DATASET ACTIVATE WoR.
+SELECT IF (RINPERSOONS = 'R').
+EXECUTE.
+
+* Identify Duplicate Cases.
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast1.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast1.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast1 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast1 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast1 (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast1.
+EXECUTE.
+
+SELECT IF PrimaryLast1 = 1.
+EXECUTE.
+
+*Nu koppelen aan adresobject.
+GET FILE='G:\Bevolking\GBAADRESOBJECTBUS\GBAADRESOBJECT2024BUSV1.sav'.
+DATASET NAME Adresobject.
+DATASET ACTIVATE WoR.
+SORT CASES BY RINPERSOON.
+MATCH FILES /FILE='Adresobject' /TABLE='WoR' /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME WoR_Adres.
+
+
+
+*Stap 2: Selecteer alle cases in dit gekoppelde bestand van WoR.
+SELECT IF PrimaryLast1 = 1.
+EXECUTE.
+
+
+*Stap 3: Gemeente/wijk/buurt toevoegen via VSLGtab.
+GET FILE='G:\BouwenWonen\VSLGWBTAB\VSLGWB2025TAB03V1.sav'.
+DATASET NAME GWB.
+DATASET ACTIVATE GWB.
+SORT CASES BY SOORTOBJECTNUMMER RINOBJECTNUMMER.
+DATASET ACTIVATE WoR_Adres.
+SORT CASES BY SOORTOBJECTNUMMER RINOBJECTNUMMER.
+MATCH FILES /FILE='WoR_Adres' /TABLE='GWB' /BY SOORTOBJECTNUMMER RINOBJECTNUMMER.
+EXECUTE.
+DATASET NAME WoR_GWB.
+
+
+* VARIABELEN VERWIJDEREN WAAR WE NIKS MEE DOEN (1999 TM 2024).
+DELETE VARIABLES gem1999
+wc1999
+bc1999
+gem2000
+wc2000
+bc2000
+gem2001
+wc2001
+bc2001
+gem2002
+wc2002
+bc2002
+gem2003
+wc2003
+bc2003
+gem2004
+wc2004
+bc2004
+gem2005
+wc2005
+bc2005
+gem2006
+wc2006
+bc2006
+gem2007
+wc2007
+bc2007
+gem2008
+wc2008
+bc2008
+gem2009
+wc2009
+bc2009
+gem2010
+wc2010
+bc2010
+gem2011
+wc2011
+bc2011
+gem2012
+wc2012
+bc2012
+gem2013
+wc2013
+bc2013
+gem2014
+wc2014
+bc2014
+gem2015
+wc2015
+bc2015
+gem2016
+wc2016
+bc2016
+gem2017
+wc2017
+bc2017
+gem2018
+wc2018
+bc2018
+gem2019
+wc2019
+bc2019
+gem2020
+wc2020
+bc2020
+gem2021
+wc2021
+bc2021
+gem2022
+wc2022
+bc2022
+gem2023
+wc2023
+bc2023
+gem2024
+wc2024
+bc2024.
+EXECUTE.
+
+
+*Stap 4. aggregate met syntax selecteren datum binnen adreshouding.
+*a. numeriek maken van datum adres aanvang/einde --> voor de zekerheid kopieren van kolom.
+COMPUTE Einddatum_adres_Numeric = NUMBER(GBADATUMEINDEADRESHOUDING, F8.0).
+FORMATS Einddatum_adres_Numeric (F8.0).
+EXECUTE.
+
+COMPUTE Begindatum_adres_Numeric=NUMBER(GBADATUMAANVANGADRESHOUDING, F8.0).
+FORMATS Begindatum_adres_Numeric(F8.0).
+EXECUTE.
+
+*b. selecteren binnen data van interventie/onderzoek om het juiste adres te koppelen.
+USE ALL.
+COMPUTE filter_$=(Einddatum_adres_Numeric > 20180000 AND Begindatum_adres_Numeric < 20220000).    
+VARIABLE LABELS filter_$ 'Einddatum_adres_Numeric > 20180000 AND Begindatum_Numeric < '+
+    '20220000  (FILTER)'.
+VALUE LABELS filter_$ 0 'Not Selected' 1 'Selected'.
+FORMATS filter_$ (f1.0).
+FILTER BY filter_$.
+EXECUTE.
+
+SELECT IF filter_$ = 1.
+EXECUTE. 
+
+*c. Nu zitten er mogelijk nog dubbelen in van mensen die binnen deze periode meerdere keren zijn verhuisd, dmv aggregate deze mensen samenvoegen tot allemaal uniek cases.
+
+SORT CASES BY RINPersoon(A) Einddatum_adres_Numeric.
+
+AGGREGATE
+/OUTFILE=*
+/BREAK=RINPersoon
+/DATUM_MAX=MAX(Einddatum_adres_Numeric).
+DATASET NAME agg.
+
+MATCH FILES /FILE=WoR_GWB
+/TABLE= agg
+/BY RINPersoon.
+EXECUTE.
+
+COMPUTE Keep_adres = 0.
+IF (Einddatum_adres_Numeric=DATUM_MAX) Keep_adres =1.
+EXECUTE.
+SELECT IF Keep_adres = 1.
+EXECUTE. 
+
+DATASET NAME WOR.
+
+*Opslaan als basisbestand, hierna kan ik alle CBS microdata er aan toevoegen. 
+
+  SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\WoR_BASIS.sav"
+  /COMPRESSED.
+
+***************************************************************************************************************************
+****************************************VERVOLG CBS MICRODATA TOEVOEGEN*************************************.
+***************************************************************************************************************************
+GET
+  FILE='G:\Bevolking\GBAPERSOONTAB\2024\GBAPERSOON2024TABV2.sav'.
+DATASET NAME GBAPERSOON WINDOW=FRONT.
+
+** stap 1: Koppelen van de WoR aan de CBS data (starten met GBAPERSOONTAB).
+DATASET ACTIVATE WOR.
+*DATASET ACTIVATE GBAPERSOON.
+*SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WOR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GBAPERSOON.
+MATCH FILES /FILE='WOR' /TABLE='GBAPERSOON' /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME GBAPERSOON_WELZIJN.
+DATASET CLOSE WOR.
+
+** stap 2: CBS data bewerken.
+* Define Variable Properties.
+ALTER TYPE  GBAGEBOORTEJAAR(F4.0).
+ALTER TYPE  GBAGEBOORTEMAAND(F2.0).
+ALTER TYPE  GBAGEBOORTEDAG(F2.0).
+FORMATS  GBAGEBOORTEJAAR(F4.0).
+FORMATS  GBAGEBOORTEMAAND(F2.0).
+FORMATS  GBAGEBOORTEDAG(F2.0).
+EXECUTE.
+
+* Geboortedatum aanmaken (geboortedag staat standaard op 01).
+COMPUTE GebDatum = DATE.DMY(GBAGEBOORTEDAG, GBAGEBOORTEMAAND, GBAGEBOORTEJAAR).
+VARIABLE LABELS GebDatum 'Geboortedatum (met 01 als standaard geboortedag)'.
+FORMATS  GebDatum(SDATE10).
+EXECUTE. 
+
+
+DELETE VARIABLES GBAGEBOORTELAND
+GBAGEBOORTELANDMOEDER
+GBAGEBOORTELANDVADER
+GBAAANTALOUDERSBUITENLAND
+GBAGENERATIE
+GBAGEBOORTEJAAR
+GBAGEBOORTEMAAND
+GBAGEBOORTEDAG
+GBAGESLACHTMOEDER
+GBAGESLACHTVADER
+GBAGEBOORTEJAARMOEDER
+GBAGEBOORTEMAANDMOEDER
+GBAGEBOORTEDAGMOEDER
+GBAGEBOORTEJAARVADER
+GBAGEBOORTEMAANDVADER
+GBAGEBOORTEDAGVADER
+GBAIMPUTATIECODE
+GBAGEBOORTELANDNL
+GBAHERKOMSTLAND.
+EXECUTE. 
+
+RENAME VARIABLES (GBAHERKOMSTGROEPERING = LAND).
+EXECUTE. 
+
+GET FILE='K:\Utilities\Code_Listings\SSBreferentiebestanden\LANDAKTUEELREFV13.SAV'.
+DATASET NAME LandAktueel.
+DATASET ACTIVATE GBAPERSOON_WELZIJN.
+SORT CASES BY LAND.
+DATASET ACTIVATE LandAktueel.
+SORT CASES BY LAND.
+DATASET ACTIVATE GBAPERSOON_WELZIJN.
+MATCH FILES /FILE=*
+  /TABLE='LandAktueel'
+  /BY LAND.
+EXECUTE.
+
+
+STRING Migratieachtergrond (A50).
+COMPUTE Migratieachtergrond = LANDACHTDELING.
+VARIABLE LABELS Migratieachtergrond 'Migratieachtergrond gebaseerd op CBS 8-deling plus extra categorie Midden- en Oost-Europa'.
+RECODE Migratieachtergrond ('-'='-')('1'='1') ('2'='3')('3'='4')('4'='5')('5'='6')('6'='7')('7'='8')('8'='9').
+EXECUTE. 
+VALUE LABELS Migratieachtergrond
+'-' 'Onbekend' 
+'1' 'Nederland'
+'2' 'Midden- en Oost-Europa'
+'3' 'Overig Europa'
+'4' 'Turkije'
+'5' 'Marokko'
+'6' 'Suriname'
+'7' 'Nederlands-Caribisch gebied'
+'8' 'Indonesi '
+'9' 'Overig Afrika, Azi , Amerika en Oceani '.
+EXECUTE. 
+
+IF (LANDACHTDELING EQ '2' AND LANDAKTUEEL12 EQ '2') Migratieachtergrond = '2'.
+EXECUTE. 
+
+DELETE VARIABLES WERELDDEEL
+LANDTYPE
+LANDAKTUEEL
+LANDAKTUEEL2
+LANDAKTUEEL3
+LANDAKTUEEL4
+LANDAKTUEEL5
+ETNGRP
+LANDAKTUEEL7
+LANDAKTUEEL8
+LANDAKTUEEL9
+LANDAKTUEEL10
+LANDAKTUEEL11
+LANDAKTUEELACHTERSTANDBO
+LANDAKTUEELCN
+LANDAKTUEEL12
+LANDAKTUEEL13
+WERELDDEEL2
+LANDTIENDELING
+LANDDRIEDELING
+LANDACHTDELING
+LANDINDELING20.
+EXECUTE. 
+
+DATASET NAME WOR.
+
+* De microdatabestanden sluiten.
+DATASET CLOSE GBAPERSOON.
+DATASET CLOSE LandAktueel. 
+
+
+***************************************************************************************************************************
+*********************************************INKOMEN & SCHULDEN**************************************************
+***************************************************************************************************************************
+GET FILE='G:\InkomenBestedingen\INHATAB\INHA2019TABV2.sav'.
+DATASET NAME Inkomenhuishouden2019.
+
+
+DATASET ACTIVATE Inkomenhuishouden2019.
+GET FILE='G:\InkomenBestedingen\INHATAB\KOPPELPERSOONHUISHOUDEN2019V2.sav'.
+DATASET NAME Koppelpersoonshuishouden2019.
+DATASET ACTIVATE Inkomenhuishouden2019.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Koppelpersoonshuishouden2019.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Inkomenhuishouden2019.
+MATCH FILES /FILE='Koppelpersoonshuishouden2019' /TABLE='Inkomenhuishouden2019' /BY RINPERSOONSHKW RINPERSOONHKW.
+EXECUTE.
+DATASET NAME Tussenbestand2019.
+DATASET CLOSE Koppelpersoonshuishouden2019.
+
+
+
+DATASET ACTIVATE WOR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Tussenbestand2019.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WOR.
+MATCH FILES /FILE=WOR
+  /Table='Tussenbestand2019'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Inkomenhuishouden2019.
+DATASET CLOSE Tussenbestand2019.
+
+DATASET NAME GEMWIJKINHA_19.
+
+DELETE VARIABLES
+INHAHLMI
+INHARMEUR
+INHARMEURL
+INHARMLAG
+INHARMLAGL
+INHARMSOC
+INHARMSOCL
+INHBBIHJ
+INHBELIH
+INHBESTINKH
+INHBRUTINKH
+INHGESTINKH
+INHP100HBEST
+INHP100HBESTES
+INHP100HBRUT
+INHP100HGEST
+INHP100HPRIM
+INHPOPIIV
+INHPRIMINKH
+INHSAMAOW
+INHSAMHH
+INHUAF.
+EXECUTE.
+
+
+ALTER TYPE  INHUAFTYP(F3.0).
+FORMATS  INHUAFTYP(F3.0).
+EXECUTE.
+
+ALTER TYPE  INHEHALGR(F3.0).
+FORMATS  INHEHALGR(F3.0).
+EXECUTE.
+
+
+RENAME VARIABLES (INHAHL INHEHALGR 
+INHP100HGESTES INHUAFL INHUAFTYP= Y19_INHAHL Y19_INHEHALGR
+Y19_INHP100HGESTES Y19_INHUAFL Y19_INHUAFTYP).
+EXECUTE. 
+
+
+RECODE Y19_INHUAFL (-4=0) (-2=0) (-1=0) (0=0) (1 thru 10=1) (10 thru 20=2) (20 thru 30=3) (30 thru 40=4) (40 thru 50=5) (50 thru HIGHEST=6) INTO Y19_Uitkeringsafhankelijkheid.
+apply dictionary from */source variables = Y19_INHUAFL /target variables = Y19_Uitkeringsafhankelijkheid.
+VALUE LABELS Y19_Uitkeringsafhankelijkheid
+0 'Geen uitkering'
+1 '0 tot 10% Uitkering' 
+2 '10 tot 20% Uitkering' 
+3 '20 tot 30% uitkering'
+4 '30 tot 40% uikering'
+5 '40 tot 50% uitkering'
+6 '50% of meer uitkering'. 
+EXECUTE.
+
+
+RECODE Y19_INHEHALGR (1=1) (2=2) (3=3) (8=4) (9=5) (SYSMIS=5) INTO Y19_Woningbezit.
+apply dictionary from */source variables = Y19_INHEHALGR /target variables = Y19_Woningbezit.
+VALUE LABELS Y19_Woningbezit
+1 'Eigen woning' 
+2 'Huur woning zonder toeslag' 
+3 'Huur woning met toeslag'
+4 'Institutioneel huishouden'
+5 'Onbekend'. 
+EXECUTE.
+
+RECODE Y19_INHUAFTYP (0=0) (1=1) (2=2) (3=3) (4=4) (8=5) (9=6) INTO Y19_SoortUitkering.
+apply dictionary from */source variables = Y19_INHUAFTYP /target variables = Y19_SoortUitkering.
+VALUE LABELS Y19_SoortUitkering
+0 'Geen uitkering'
+1 'Werkloosheidsuitkering' 
+2 'Arbeidsongeschiktheidsuitkering' 
+3 'Bijstandsuitkering'
+4 'Uitkering overige sociale voorziening'
+5 'Institutioneel huishouden'
+6 'Particulier huishouden met onbekend inkomen'.
+EXECUTE.
+
+
+DELETE VARIABLES
+Y19_INHEHALGR
+Y19_INHUAFTYP
+RINPERSOONSHKW
+RINPERSOONHKW. 
+EXECUTE.
+
+
+*AANPASSEN.
+RECODE Y19_INHP100HGESTES (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y19_INHP100GESTES_class.
+apply dictionary from */source variables = Y19_INHP100HGESTES /target variables = Y19_INHP100GESTES_class.
+VALUE LABELS Y19_INHP100GESTES_class
+-3 'Particulier studentenhuishouden'
+-2 'Institutioneel huishouden'
+-1 'Particulier huishouden met een onbekend inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA_19.sav'
+  /COMPRESSED.
+DATASET CLOSE GEMWIJKINHA_19.
+
+
+*2020.
+
+GET FILE='G:\InkomenBestedingen\INHATAB\INHA2020TABV2.sav'.
+DATASET NAME Inkomenhuishouden2020.
+
+
+DATASET ACTIVATE Inkomenhuishouden2020.
+GET FILE='G:\InkomenBestedingen\INHATAB\KOPPELPERSOONHUISHOUDEN2020V2.sav'.
+DATASET NAME Koppelpersoonshuishouden2020.
+DATASET ACTIVATE Inkomenhuishouden2020.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Koppelpersoonshuishouden2020.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Inkomenhuishouden2020.
+MATCH FILES /FILE='Koppelpersoonshuishouden2020' /TABLE='Inkomenhuishouden2020' /BY RINPERSOONSHKW RINPERSOONHKW.
+EXECUTE.
+DATASET NAME Tussenbestand2020.
+DATASET CLOSE Koppelpersoonshuishouden2020.
+
+GET FILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA_19.sav'.
+DATASET NAME GEMWIJKGBAINK19.
+
+DATASET ACTIVATE GEMWIJKGBAINK19.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Tussenbestand2020.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GEMWIJKGBAINK19.
+MATCH FILES /FILE=GEMWIJKGBAINK19
+  /Table='Tussenbestand2020'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Inkomenhuishouden2020.
+DATASET CLOSE Tussenbestand2020.
+
+DATASET NAME GEMWIJKINHA_20.
+
+DELETE VARIABLES
+INHAHLMI
+INHARMEUR
+INHARMEURL
+INHARMLAG
+INHARMLAGL
+INHARMSOC
+INHARMSOCL
+INHBBIHJ
+INHBELIH
+INHBESTINKH
+INHBRUTINKH
+INHGESTINKH
+INHP100HBEST
+INHP100HBESTES
+INHP100HBRUT
+INHP100HGEST
+INHP100HPRIM
+INHPOPIIV
+INHPRIMINKH
+INHSAMAOW
+INHSAMHH
+INHUAF.
+EXECUTE.
+
+
+ALTER TYPE  INHUAFTYP(F3.0).
+FORMATS  INHUAFTYP(F3.0).
+EXECUTE.
+
+ALTER TYPE  INHEHALGR(F3.0).
+FORMATS  INHEHALGR(F3.0).
+EXECUTE.
+
+
+RENAME VARIABLES (INHAHL INHEHALGR 
+INHP100HGESTES INHUAFL INHUAFTYP= Y20_INHAHL Y20_INHEHALGR
+Y20_INHP100HGESTES Y20_INHUAFL Y20_INHUAFTYP).
+EXECUTE. 
+
+
+RECODE Y20_INHUAFL (-4=0) (-2=0) (-1=0) (0=0) (1 thru 10=1) (10 thru 20=2) (20 thru 30=3) (30 thru 40=4) (40 thru 50=5) (50 thru HIGHEST=6) INTO Y20_Uitkeringsafhankelijkheid.
+apply dictionary from */source variables = Y20_INHUAFL /target variables = Y20_Uitkeringsafhankelijkheid.
+VALUE LABELS Y20_Uitkeringsafhankelijkheid
+0 'Geen uitkering'
+1 '0 tot 10% Uitkering' 
+2 '10 tot 20% Uitkering' 
+3 '20 tot 30% uitkering'
+4 '30 tot 40% uikering'
+5 '40 tot 50% uitkering'
+6 '50% of meer uitkering'. 
+EXECUTE.
+
+
+RECODE Y20_INHEHALGR (1=1) (2=2) (3=3) (8=4) (9=5) (SYSMIS=5) INTO Y20_Woningbezit.
+apply dictionary from */source variables = Y20_INHEHALGR /target variables = Y20_Woningbezit.
+VALUE LABELS Y20_Woningbezit
+1 'Eigen woning' 
+2 'Huur woning zonder toeslag' 
+3 'Huur woning met toeslag'
+4 'Institutioneel huishouden'
+5 'Onbekend'. 
+EXECUTE.
+
+RECODE Y20_INHUAFTYP (0=0) (1=1) (2=2) (3=3) (4=4) (8=5) (9=6) INTO Y20_SoortUitkering.
+apply dictionary from */source variables = Y20_INHUAFTYP /target variables = Y20_SoortUitkering.
+VALUE LABELS Y20_SoortUitkering
+0 'Geen uitkering'
+1 'Werkloosheidsuitkering' 
+2 'Arbeidsongeschiktheidsuitkering' 
+3 'Bijstandsuitkering'
+4 'Uitkering overige sociale voorziening'
+5 'Institutioneel huishouden'
+6 'Particulier huishouden met onbekend inkomen'.
+EXECUTE.
+
+
+DELETE VARIABLES
+Y20_INHEHALGR
+Y20_INHUAFTYP
+RINPERSOONSHKW
+RINPERSOONHKW. 
+EXECUTE.
+
+
+RECODE Y20_INHP100HGESTES (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y20_INHP100GESTES_class.
+apply dictionary from */source variables = Y20_INHP100HGESTES /target variables = Y20_INHP100GESTES_class.
+VALUE LABELS Y20_INHP100GESTES_class
+-3 'Particulier studentenhuishouden'
+-2 'Institutioneel huishouden'
+-1 'Particulier huishouden met een onbekend inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA19_20.sav'
+  /COMPRESSED.
+DATASET CLOSE GEMWIJKINHA_20.
+
+
+*2021.
+
+GET FILE='G:\InkomenBestedingen\INHATAB\INHA2021TABV2.sav'.
+DATASET NAME Inkomenhuishouden2021.
+
+
+DATASET ACTIVATE Inkomenhuishouden2021.
+GET FILE='G:\InkomenBestedingen\INHATAB\KOPPELPERSOONHUISHOUDEN2021V2.sav'.
+DATASET NAME Koppelpersoonshuishouden2021.
+DATASET ACTIVATE Inkomenhuishouden2021.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Koppelpersoonshuishouden2021.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Inkomenhuishouden2021.
+MATCH FILES /FILE='Koppelpersoonshuishouden2021' /TABLE='Inkomenhuishouden2021' /BY RINPERSOONSHKW RINPERSOONHKW.
+EXECUTE.
+DATASET NAME Tussenbestand2021.
+DATASET CLOSE Koppelpersoonshuishouden2021.
+
+GET FILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA19_20.sav'.
+DATASET NAME GEMWIJKGBAINK20.
+
+DATASET ACTIVATE GEMWIJKGBAINK20.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Tussenbestand2021.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GEMWIJKGBAINK20.
+MATCH FILES /FILE=GEMWIJKGBAINK20
+  /Table='Tussenbestand2021'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Inkomenhuishouden2021.
+DATASET CLOSE Tussenbestand2021.
+DATASET NAME GEMWIJKINHA_21.
+
+
+DELETE VARIABLES
+INHAHLMI
+INHARMEUR
+INHARMEURL
+INHARMLAG
+INHARMLAGL
+INHARMSOC
+INHARMSOCL
+INHBBIHJ
+INHBELIH
+INHBESTINKH
+INHBRUTINKH
+INHGESTINKH
+INHP100HBEST
+INHP100HBESTES
+INHP100HBRUT
+INHP100HGEST
+INHP100HPRIM
+INHPOPIIV
+INHPRIMINKH
+INHSAMAOW
+INHSAMHH
+INHUAF.
+EXECUTE.
+
+
+ALTER TYPE  INHUAFTYP(F3.0).
+FORMATS  INHUAFTYP(F3.0).
+EXECUTE.
+
+ALTER TYPE  INHEHALGR(F3.0).
+FORMATS  INHEHALGR(F3.0).
+EXECUTE.
+
+
+RENAME VARIABLES (INHAHL INHEHALGR 
+INHP100HGESTES INHUAFL INHUAFTYP= Y21_INHAHL Y21_INHEHALGR
+Y21_INHP100HGESTES Y21_INHUAFL Y21_INHUAFTYP).
+EXECUTE. 
+
+
+RECODE Y21_INHUAFL (-4=0) (-2=0) (-1=0) (0=0) (1 thru 10=1) (10 thru 20=2) (20 thru 30=3) (30 thru 40=4) (40 thru 50=5) (50 thru HIGHEST=6) INTO Y21_Uitkeringsafhankelijkheid.
+apply dictionary from */source variables = Y21_INHUAFL /target variables = Y21_Uitkeringsafhankelijkheid.
+VALUE LABELS Y21_Uitkeringsafhankelijkheid
+0 'Geen uitkering'
+1 '0 tot 10% Uitkering' 
+2 '10 tot 20% Uitkering' 
+3 '20 tot 30% uitkering'
+4 '30 tot 40% uikering'
+5 '40 tot 50% uitkering'
+6 '50% of meer uitkering'. 
+EXECUTE.
+
+
+RECODE Y21_INHEHALGR (1=1) (2=2) (3=3) (8=4) (9=5) (SYSMIS=5) INTO Y21_Woningbezit.
+apply dictionary from */source variables = Y21_INHEHALGR /target variables = Y21_Woningbezit.
+VALUE LABELS Y21_Woningbezit
+1 'Eigen woning' 
+2 'Huur woning zonder toeslag' 
+3 'Huur woning met toeslag'
+4 'Institutioneel huishouden'
+5 'Onbekend'. 
+EXECUTE.
+
+RECODE Y21_INHUAFTYP (0=0) (1=1) (2=2) (3=3) (4=4) (8=5) (9=6) INTO Y21_SoortUitkering.
+apply dictionary from */source variables = Y21_INHUAFTYP /target variables = Y21_SoortUitkering.
+VALUE LABELS Y21_SoortUitkering
+0 'Geen uitkering'
+1 'Werkloosheidsuitkering' 
+2 'Arbeidsongeschiktheidsuitkering' 
+3 'Bijstandsuitkering'
+4 'Uitkering overige sociale voorziening'
+5 'Institutioneel huishouden'
+6 'Particulier huishouden met onbekend inkomen'.
+EXECUTE.
+
+
+DELETE VARIABLES
+Y21_INHEHALGR
+Y21_INHUAFTYP
+RINPERSOONSHKW
+RINPERSOONHKW. 
+EXECUTE.
+
+
+RECODE Y21_INHP100HGESTES (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y21_INHP100GESTES_class.
+apply dictionary from */source variables = Y21_INHP100HGESTES /target variables = Y21_INHP100GESTES_class.
+VALUE LABELS Y21_INHP100GESTES_class
+-3 'Particulier studentenhuishouden'
+-2 'Institutioneel huishouden'
+-1 'Particulier huishouden met een onbekend inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA19_21.sav'
+  /COMPRESSED.
+DATASET CLOSE GEMWIJKINHA_21.
+
+
+*2022.
+GET FILE='G:\InkomenBestedingen\INHATAB\INHA2022TABV2.sav'.
+DATASET NAME Inkomenhuishouden2022.
+
+
+DATASET ACTIVATE Inkomenhuishouden2022.
+GET FILE='G:\InkomenBestedingen\INHATAB\KOPPELPERSOONHUISHOUDEN2022V2.sav'.
+DATASET NAME Koppelpersoonshuishouden2022.
+DATASET ACTIVATE Inkomenhuishouden2022.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Koppelpersoonshuishouden2022.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Inkomenhuishouden2022.
+MATCH FILES /FILE='Koppelpersoonshuishouden2022' /TABLE='Inkomenhuishouden2022' /BY RINPERSOONSHKW RINPERSOONHKW.
+EXECUTE.
+DATASET NAME Tussenbestand2022.
+DATASET CLOSE Koppelpersoonshuishouden2022.
+
+GET FILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA19_21.sav'.
+DATASET NAME GEMWIJKGBAINK21.
+
+
+DATASET ACTIVATE GEMWIJKGBAINK21.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Tussenbestand2022.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GEMWIJKGBAINK21.
+MATCH FILES /FILE=GEMWIJKGBAINK21
+  /Table='Tussenbestand2022'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Inkomenhuishouden2022.
+DATASET CLOSE Tussenbestand2022.
+DATASET NAME GEMWIJKINHA_22.
+
+
+DELETE VARIABLES
+INHAHLMI
+INHARMEUR
+INHARMEURL
+INHARMLAG
+INHARMLAGL
+INHARMSOC
+INHARMSOCL
+INHBBIHJ
+INHBELIH
+INHBESTINKH
+INHBRUTINKH
+INHGESTINKH
+INHP100HBEST
+INHP100HBESTES
+INHP100HBRUT
+INHP100HGEST
+INHP100HPRIM
+INHPOPIIV
+INHPRIMINKH
+INHSAMAOW
+INHSAMHH
+INHUAF.
+EXECUTE.
+
+
+ALTER TYPE  INHUAFTYP(F3.0).
+FORMATS  INHUAFTYP(F3.0).
+EXECUTE.
+
+ALTER TYPE  INHEHALGR(F3.0).
+FORMATS  INHEHALGR(F3.0).
+EXECUTE.
+
+
+RENAME VARIABLES (INHAHL INHEHALGR 
+INHP100HGESTES INHUAFL INHUAFTYP= Y22_INHAHL Y22_INHEHALGR
+Y22_INHP100HGESTES Y22_INHUAFL Y22_INHUAFTYP).
+EXECUTE. 
+
+
+RECODE Y22_INHUAFL (-4=0) (-2=0) (-1=0) (0=0) (1 thru 10=1) (10 thru 20=2) (20 thru 30=3) (30 thru 40=4) (40 thru 50=5) (50 thru HIGHEST=6) INTO Y22_Uitkeringsafhankelijkheid.
+apply dictionary from */source variables = Y22_INHUAFL /target variables = Y22_Uitkeringsafhankelijkheid.
+VALUE LABELS Y22_Uitkeringsafhankelijkheid
+0 'Geen uitkering'
+1 '0 tot 10% Uitkering' 
+2 '10 tot 20% Uitkering' 
+3 '20 tot 30% uitkering'
+4 '30 tot 40% uikering'
+5 '40 tot 50% uitkering'
+6 '50% of meer uitkering'. 
+EXECUTE.
+
+
+RECODE Y22_INHEHALGR (1=1) (2=2) (3=3) (8=4) (9=5) (SYSMIS=5) INTO Y22_Woningbezit.
+apply dictionary from */source variables = Y22_INHEHALGR /target variables = Y22_Woningbezit.
+VALUE LABELS Y22_Woningbezit
+1 'Eigen woning' 
+2 'Huur woning zonder toeslag' 
+3 'Huur woning met toeslag'
+4 'Institutioneel huishouden'
+5 'Onbekend'. 
+EXECUTE.
+
+RECODE Y22_INHUAFTYP (0=0) (1=1) (2=2) (3=3) (4=4) (8=5) (9=6) INTO Y22_SoortUitkering.
+apply dictionary from */source variables = Y22_INHUAFTYP /target variables = Y22_SoortUitkering.
+VALUE LABELS Y22_SoortUitkering
+0 'Geen uitkering'
+1 'Werkloosheidsuitkering' 
+2 'Arbeidsongeschiktheidsuitkering' 
+3 'Bijstandsuitkering'
+4 'Uitkering overige sociale voorziening'
+5 'Institutioneel huishouden'
+6 'Particulier huishouden met onbekend inkomen'.
+EXECUTE.
+
+
+DELETE VARIABLES
+Y22_INHEHALGR
+Y22_INHUAFTYP
+RINPERSOONSHKW
+RINPERSOONHKW. 
+EXECUTE.
+
+
+RECODE Y22_INHP100HGESTES (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y22_INHP100GESTES_class.
+apply dictionary from */source variables = Y22_INHP100HGESTES /target variables = Y22_INHP100GESTES_class.
+VALUE LABELS Y22_INHP100GESTES_class
+-3 'Particulier studentenhuishouden'
+-2 'Institutioneel huishouden'
+-1 'Particulier huishouden met een onbekend inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA19_22.sav'
+  /COMPRESSED.
+DATASET NAME GEMWIJKINHA_22.
+DATASET CLOSE GEMWIJKINHA_22.
+
+
+*2023.
+GET FILE='G:\InkomenBestedingen\INHATAB\INHA2023TABV1.sav'.
+DATASET NAME Inkomenhuishouden2023.
+
+
+DATASET ACTIVATE Inkomenhuishouden2023.
+GET FILE='G:\InkomenBestedingen\INHATAB\KOPPELPERSOONHUISHOUDEN2023V1.sav'.
+DATASET NAME Koppelpersoonshuishouden2023.
+DATASET ACTIVATE Inkomenhuishouden2023.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Koppelpersoonshuishouden2023.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Inkomenhuishouden2023.
+MATCH FILES /FILE='Koppelpersoonshuishouden2023' /TABLE='Inkomenhuishouden2023' /BY RINPERSOONSHKW RINPERSOONHKW.
+EXECUTE.
+DATASET NAME Tussenbestand2023.
+DATASET CLOSE Koppelpersoonshuishouden2023.
+
+GET FILE = 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA19_22.sav'.
+ DATASET NAME GEMWIJKGBAINK22.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Tussenbestand2023.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GEMWIJKGBAINK22.
+MATCH FILES /FILE=GEMWIJKGBAINK22
+    /Table='Tussenbestand2023'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+DATASET CLOSE Inkomenhuishouden2023.
+DATASET CLOSE Tussenbestand2023.
+
+
+DELETE VARIABLES
+INHAHLMI
+INHARMEUR
+INHARMEURL
+INHARMLAG
+INHARMLAGL
+INHARMSOC
+INHARMSOCL
+INHBBIHJ
+INHBELIH
+INHBESTINKH
+INHBRUTINKH
+INHGESTINKH
+INHP100HBEST
+INHP100HBESTES
+INHP100HBRUT
+INHP100HGEST
+INHP100HPRIM
+INHPOPIIV
+INHPRIMINKH
+INHSAMAOW
+INHSAMHH
+INHUAF.
+EXECUTE.
+
+ALTER TYPE  INHUAFTYP(F3.0).
+FORMATS  INHUAFTYP(F3.0).
+EXECUTE.
+
+ALTER TYPE  INHEHALGR(F3.0).
+FORMATS  INHEHALGR(F3.0).
+EXECUTE.
+
+
+RENAME VARIABLES (INHAHL INHEHALGR 
+INHP100HGESTES INHUAFL INHUAFTYP= Y23_INHAHL Y23_INHEHALGR
+Y23_INHP100HGESTES Y23_INHUAFL Y23_INHUAFTYP).
+EXECUTE. 
+
+
+RECODE Y23_INHUAFL (-4=0) (-2=0) (-1=0) (0=0) (1 thru 10=1) (10 thru 20=2) (20 thru 30=3) (30 thru 40=4) (40 thru 50=5) (50 thru HIGHEST=6) INTO Y23_Uitkeringsafhankelijkheid.
+apply dictionary from */source variables = Y23_INHUAFL /target variables = Y23_Uitkeringsafhankelijkheid.
+VALUE LABELS Y23_Uitkeringsafhankelijkheid
+0 'Geen uitkering'
+1 '0 tot 10% Uitkering' 
+2 '10 tot 20% Uitkering' 
+3 '20 tot 30% uitkering'
+4 '30 tot 40% uikering'
+5 '40 tot 50% uitkering'
+6 '50% of meer uitkering'. 
+EXECUTE.
+
+
+RECODE Y23_INHEHALGR (1=1) (2=2) (3=3) (8=4) (9=5) (SYSMIS=5) INTO Y23_Woningbezit.
+apply dictionary from */source variables = Y23_INHEHALGR /target variables = Y23_Woningbezit.
+VALUE LABELS Y23_Woningbezit
+1 'Eigen woning' 
+2 'Huur woning zonder toeslag' 
+3 'Huur woning met toeslag'
+4 'Institutioneel huishouden'
+5 'Onbekend'. 
+EXECUTE.
+
+RECODE Y23_INHUAFTYP (0=0) (1=1) (2=2) (3=3) (4=4) (8=5) (9=6) INTO Y23_SoortUitkering.
+apply dictionary from */source variables = Y23_INHUAFTYP /target variables = Y23_SoortUitkering.
+VALUE LABELS Y23_SoortUitkering
+0 'Geen uitkering'
+1 'Werkloosheidsuitkering' 
+2 'Arbeidsongeschiktheidsuitkering' 
+3 'Bijstandsuitkering'
+4 'Uitkering overige sociale voorziening'
+5 'Institutioneel huishouden'
+6 'Particulier huishouden met onbekend inkomen'.
+EXECUTE.
+
+
+DELETE VARIABLES
+Y23_INHEHALGR
+Y23_INHUAFTYP
+RINPERSOONSHKW
+RINPERSOONHKW. 
+EXECUTE.
+
+
+RECODE Y23_INHP100HGESTES (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y23_INHP100GESTES_class.
+apply dictionary from */source variables = Y23_INHP100HGESTES /target variables = Y23_INHP100GESTES_class.
+VALUE LABELS Y23_INHP100GESTES_class
+-3 'Particulier studentenhuishouden'
+-2 'Institutioneel huishouden'
+-1 'Particulier huishouden met een onbekend inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA19_23.sav'
+  /COMPRESSED.
+
+
+**INPATAB.
+*Nu op persoonsniveau het inkomen koppelen en de toegevoegde variabelen schonen.
+
+*2019.
+GET FILE = 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INHA19_23.sav'.
+DATASET NAME INHA.
+
+GET File="G:\InkomenBestedingen\INPATAB\INPA2019TABV3.sav".
+DATASET NAME INPATAB2019.
+DATASET ACTIVATE INHA.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INPATAB2019.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INHA.
+MATCH FILES /FILE=INHA
+  /Table='INPATAB2019'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DELETE VARIABLES 
+RINPERSOONSHKW
+RINPERSOONHKW
+INPAINV3400P
+INPAMEE4420P
+INPAMKB2078P
+INPASAR2076P
+INPASPE2072P
+INPASTA2074P
+INPAVBV2079P
+INPAVWI6110P
+INPAZLF4240P
+INPBELI
+INPEMEZ
+INPEMFO
+INPMPINK
+INPIMPZELF
+INPKKCODE
+INPKKGEM
+INPKKMUT
+INPP100PPRIM
+INPPERSBRUT
+INPPERSINK
+INPPERSPRIM
+INPPG410WW
+INPPG610WAO
+INPPG710PEN
+INPPG810ZFW
+INPPH570ZWP
+INPPH670AOP
+INPPH770OUP
+INPPH780OUV
+INPPH790LLP
+INPPH865ZFW
+INPPH868ZTS
+INPPH880ZKV
+INPPI440WW
+INPPI640WAO
+INPPI840ZFW
+INPPINK
+INPPN400WW
+INPPN700PEN
+INPPN800ZFW
+INPPO830ZFW
+INPPOSHHK
+INPPS850ZFW
+INPPV420WW
+INPPV820ZFW
+INPPZ860ZFW
+INPSBIDGA2008V2016
+INPSBIMEE2008V2016
+INPSBIOVE2008V2016
+INPSBIZLF2008V2016
+INPSZHVZLFGEM2016
+INPT1000WER
+INPT1020AMB
+INPT1030DGN
+INPT1040NAT
+INPT1060OVE
+INPT1068ZVW
+INPT2070WIN
+INPT3080REN
+INPT3100OBL
+INPT3110DAB
+INPT3120DIV
+INPT3140HEW
+INPT3150ONG
+INPT3160OVB
+INPT3170RBW
+INPT3180RST
+INPT3190RBS
+INPT5210WW
+INPT5220WA
+INPT5230ZW
+INPT5240AO
+INPT5250AOP
+INPT5260AOW
+INPT5270AWW
+INPT5280PEN
+INPT5288ZVW
+INPT5290LLP
+INPT6290ABW
+INPT6300DIV
+INPT6318ZVW
+INPT6320KB
+INPT6325KGB
+INPT6330STU
+INPT7340HRS
+INPT7350REW
+INPT7360TSK
+INPT8370ONT
+INPTYPDGA
+INPTYPMEE
+INPTYPOVE
+INPTYPZLF
+INPV0390BET
+INPV3900INK
+INPYBIT2410P
+INPYBIV2420P.
+
+RENAME VARIABLES (INPP100PBRUT
+INPSECJ INPP100PPERS = Y19_INPP100PBRUT
+Y19_INPSECJ Y19_INPP100PPERS).
+EXECUTE. 
+
+DATASET CLOSE INPATAB2019.
+
+RECODE Y19_INPP100PBRUT (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y19_INPP100PBRUT_class.
+apply dictionary from */source variables = Y19_INPP100PBRUT /target variables = Y19_INPP100PBRUT_class.
+VALUE LABELS Y19_INPP100PBRUT_class
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+RECODE Y19_INPP100PPERS (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y19_INPP100PPERS_class.
+apply dictionary from */source variables = Y19_INPP100PPERS /target variables = Y19_INPP100PPERS_class.
+VALUE LABELS Y19_INPP100PPERS_class 
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE. 
+
+ SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA__INHA_INPA19.sav'
+  /COMPRESSED.
+
+*2020.
+GET FILE = 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA__INHA_INPA19.sav'.
+DATASET NAME INHA19.
+GET File="G:\InkomenBestedingen\INPATAB\INPA2020TABV3.sav".
+DATASET NAME INPATAB2020.
+DATASET ACTIVATE INHA19.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INPATAB2020.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INHA19.
+MATCH FILES /FILE=INHA19
+  /Table='INPATAB2020'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DELETE VARIABLES 
+RINPERSOONSHKW
+RINPERSOONHKW
+INPAINV3400P
+INPAMEE4420P
+INPAMKB2078P
+INPASAR2076P
+INPASPE2072P
+INPASTA2074P
+INPAVBV2079P
+INPAVWI6110P
+INPAZLF4240P
+INPBELI
+INPEMEZ
+INPEMFO
+INPMPINK
+INPIMPZELF
+INPKKCODE
+INPKKGEM
+INPKKMUT
+INPP100PPRIM
+INPPERSBRUT
+INPPERSINK
+INPPERSPRIM
+INPPG410WW
+INPPG610WAO
+INPPG710PEN
+INPPG810ZFW
+INPPH570ZWP
+INPPH670AOP
+INPPH770OUP
+INPPH780OUV
+INPPH790LLP
+INPPH865ZFW
+INPPH868ZTS
+INPPH880ZKV
+INPPI440WW
+INPPI640WAO
+INPPI840ZFW
+INPPINK
+INPPN400WW
+INPPN700PEN
+INPPN800ZFW
+INPPO830ZFW
+INPPOSHHK
+INPPS850ZFW
+INPPV420WW
+INPPV820ZFW
+INPPZ860ZFW
+INPSBIDGA2008V2016
+INPSBIMEE2008V2016
+INPSBIOVE2008V2016
+INPSBIZLF2008V2016
+INPSZHVZLFGEM2016
+INPT1000WER
+INPT1020AMB
+INPT1030DGN
+INPT1040NAT
+INPT1060OVE
+INPT1068ZVW
+INPT2070WIN
+INPT3080REN
+INPT3100OBL
+INPT3110DAB
+INPT3120DIV
+INPT3140HEW
+INPT3150ONG
+INPT3160OVB
+INPT3170RBW
+INPT3180RST
+INPT3190RBS
+INPT5210WW
+INPT5220WA
+INPT5230ZW
+INPT5240AO
+INPT5250AOP
+INPT5260AOW
+INPT5270AWW
+INPT5280PEN
+INPT5288ZVW
+INPT5290LLP
+INPT6290ABW
+INPT6300DIV
+INPT6318ZVW
+INPT6320KB
+INPT6325KGB
+INPT6330STU
+INPT7340HRS
+INPT7350REW
+INPT7360TSK
+INPT8370ONT
+INPTYPDGA
+INPTYPMEE
+INPTYPOVE
+INPTYPZLF
+INPV0390BET
+INPV3900INK
+INPYBIT2410P
+INPYBIV2420P.
+
+RENAME VARIABLES (INPP100PBRUT
+INPSECJ INPP100PPERS = Y20_INPP100PBRUT
+Y20_INPSECJ Y20_INPP100PPERS).
+EXECUTE. 
+
+DATASET CLOSE INPATAB2020.
+
+RECODE Y20_INPP100PBRUT (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y20_INPP100PBRUT_class.
+apply dictionary from */source variables = Y20_INPP100PBRUT /target variables = Y20_INPP100PBRUT_class.
+VALUE LABELS Y20_INPP100PBRUT_class
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+RECODE Y20_INPP100PPERS (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y20_INPP100PPERS_class.
+apply dictionary from */source variables = Y20_INPP100PPERS /target variables = Y20_INPP100PPERS_class.
+VALUE LABELS Y20_INPP100PPERS_class 
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE. 
+
+ SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA__INHA_INPA20.sav'
+  /COMPRESSED.
+
+
+*2021.
+GET FILE = 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA__INHA_INPA20.sav'.
+DATASET NAME INHA20.
+GET File="G:\InkomenBestedingen\INPATAB\INPA2021TABV3.sav".
+DATASET NAME INPATAB2021.
+DATASET ACTIVATE INHA20.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INPATAB2021.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INHA20.
+MATCH FILES /FILE=INHA20
+  /Table='INPATAB2021'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DELETE VARIABLES 
+RINPERSOONSHKW
+RINPERSOONHKW
+INPAINV3400P
+INPAMEE4420P
+INPAMKB2078P
+INPASAR2076P
+INPASPE2072P
+INPASTA2074P
+INPAVBV2079P
+INPAVWI6110P
+INPAZLF4240P
+INPBELI
+INPEMEZ
+INPEMFO
+INPMPINK
+INPIMPZELF
+INPKKCODE
+INPKKGEM
+INPKKMUT
+INPP100PPRIM
+INPPERSBRUT
+INPPERSINK
+INPPERSPRIM
+INPPG410WW
+INPPG610WAO
+INPPG710PEN
+INPPG810ZFW
+INPPH570ZWP
+INPPH670AOP
+INPPH770OUP
+INPPH780OUV
+INPPH790LLP
+INPPH865ZFW
+INPPH868ZTS
+INPPH880ZKV
+INPPI440WW
+INPPI640WAO
+INPPI840ZFW
+INPPINK
+INPPN400WW
+INPPN700PEN
+INPPN800ZFW
+INPPO830ZFW
+INPPOSHHK
+INPPS850ZFW
+INPPV420WW
+INPPV820ZFW
+INPPZ860ZFW
+INPSBIDGA2008V2016
+INPSBIMEE2008V2016
+INPSBIOVE2008V2016
+INPSBIZLF2008V2016
+INPSZHVZLFGEM2016
+INPT1000WER
+INPT1020AMB
+INPT1030DGN
+INPT1040NAT
+INPT1060OVE
+INPT1068ZVW
+INPT2070WIN
+INPT3080REN
+INPT3100OBL
+INPT3110DAB
+INPT3120DIV
+INPT3140HEW
+INPT3150ONG
+INPT3160OVB
+INPT3170RBW
+INPT3180RST
+INPT3190RBS
+INPT5210WW
+INPT5220WA
+INPT5230ZW
+INPT5240AO
+INPT5250AOP
+INPT5260AOW
+INPT5270AWW
+INPT5280PEN
+INPT5288ZVW
+INPT5290LLP
+INPT6290ABW
+INPT6300DIV
+INPT6318ZVW
+INPT6320KB
+INPT6325KGB
+INPT6330STU
+INPT7340HRS
+INPT7350REW
+INPT7360TSK
+INPT8370ONT
+INPTYPDGA
+INPTYPMEE
+INPTYPOVE
+INPTYPZLF
+INPV0390BET
+INPV3900INK
+INPYBIT2410P
+INPYBIV2420P.
+
+RENAME VARIABLES (INPP100PBRUT
+INPSECJ INPP100PPERS = Y21_INPP100PBRUT
+Y21_INPSECJ Y21_INPP100PPERS).
+EXECUTE. 
+
+DATASET CLOSE INPATAB2021.
+
+RECODE Y21_INPP100PBRUT (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y21_INPP100PBRUT_class.
+apply dictionary from */source variables = Y21_INPP100PBRUT /target variables = Y21_INPP100PBRUT_class.
+VALUE LABELS Y21_INPP100PBRUT_class
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+RECODE Y21_INPP100PPERS (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y21_INPP100PPERS_class.
+apply dictionary from */source variables = Y21_INPP100PPERS /target variables = Y21_INPP100PPERS_class.
+VALUE LABELS Y21_INPP100PPERS_class 
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE. 
+
+ SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA__INHA_INPA21.sav'
+  /COMPRESSED.
+
+
+*2022.
+GET FILE = 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA__INHA_INPA21.sav'.
+DATASET NAME INHA21.
+GET File="G:\InkomenBestedingen\INPATAB\INPA2022TABV3.sav".
+DATASET NAME INPATAB2022.
+DATASET ACTIVATE INHA21.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INPATAB2022.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INHA21.
+MATCH FILES /FILE=INHA21
+  /Table='INPATAB2022'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DELETE VARIABLES 
+RINPERSOONSHKW
+RINPERSOONHKW
+INPAINV3400P
+INPAMEE4420P
+INPAMKB2078P
+INPASAR2076P
+INPASPE2072P
+INPASTA2074P
+INPAVBV2079P
+INPAVWI6110P
+INPAZLF4240P
+INPBELI
+INPEMEZ
+INPEMFO
+INPIMPINK
+INPIMPZELF
+INPKKCODE
+INPKKGEM
+INPKKMUT
+INPP100PPRIM
+INPPERSBRUT
+INPPERSINK
+INPPERSPRIM
+INPPG410WW
+INPPG610WAO
+INPPG710PEN
+INPPG810ZFW
+INPPH570ZWP
+INPPH670AOP
+INPPH770OUP
+INPPH780OUV
+INPPH790LLP
+INPPH865ZFW
+INPPH868ZTS
+INPPH880ZKV
+INPPI440WW
+INPPI640WAO
+INPPI840ZFW
+INPPINK
+INPPN400WW
+INPPN700PEN
+INPPN800ZFW
+INPPO830ZFW
+INPPOSHHK
+INPPS850ZFW
+INPPV420WW
+INPPV820ZFW
+INPPZ860ZFW
+INPSBIDGA2008VJJJJ
+INPSBIMEE2008VJJJJ
+INPSBIOVE2008VJJJJ
+INPSBIZLF2008VJJJJ
+INPSZHVZLFGEMJJJJ
+INPT1000WER
+INPT1020AMB
+INPT1030DGN
+INPT1040NAT
+INPT1060OVE
+INPT1068ZVW
+INPT2070WIN
+INPT3080REN
+INPT3100OBL
+INPT3110DAB
+INPT3120DIV
+INPT3140HEW
+INPT3150ONG
+INPT3160OVB
+INPT3170RBW
+INPT3180RST
+INPT3190RBS
+INPT5210WW
+INPT5220WA
+INPT5230ZW
+INPT5240AO
+INPT5250AOP
+INPT5260AOW
+INPT5270AWW
+INPT5280PEN
+INPT5288ZVW
+INPT5290LLP
+INPT6290ABW
+INPT6300DIV
+INPT6318ZVW
+INPT6320KB
+INPT6325KGB
+INPT6330STU
+INPT7340HRS
+INPT7350REW
+INPT7360TSK
+INPT8370ONT
+INPTYPDGA
+INPTYPMEE
+INPTYPOVE
+INPTYPZLF
+INPV0390BET
+INPV3900INK
+INPYBIT2410P
+INPYBIV2420P.
+
+RENAME VARIABLES (INPP100PBRUT
+INPSECJ INPP100PPERS = Y22_INPP100PBRUT
+Y22_INPSECJ Y22_INPP100PPERS).
+EXECUTE. 
+
+DATASET CLOSE INPATAB2022.
+
+RECODE Y22_INPP100PBRUT (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y22_INPP100PBRUT_class.
+apply dictionary from */source variables = Y22_INPP100PBRUT /target variables = Y22_INPP100PBRUT_class.
+VALUE LABELS Y22_INPP100PBRUT_class
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+RECODE Y22_INPP100PPERS (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y22_INPP100PPERS_class.
+apply dictionary from */source variables = Y22_INPP100PPERS /target variables = Y22_INPP100PPERS_class.
+VALUE LABELS Y22_INPP100PPERS_class 
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE. 
+
+ SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA__INHA_INPA22.sav'
+  /COMPRESSED.
+
+
+*2023.
+GET FILE = 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA__INHA_INPA22.sav'.
+DATASET NAME INHA22.
+GET FILE ="G:\InkomenBestedingen\INPATAB\INPA2023TABV1.sav".
+DATASET NAME INPATAB2023.
+DATASET ACTIVATE INHA22.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INPATAB2023.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INHA22.
+MATCH FILES /FILE=INHA22
+  /Table='INPATAB2023'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+DELETE VARIABLES 
+RINPERSOONSHKW
+RINPERSOONHKW
+INPAINV3400P
+INPAMEE4420P
+INPAMKB2078P
+INPASAR2076P
+INPASPE2072P
+INPASTA2074P
+INPAVBV2079P
+INPAVWI6110P
+INPAZLF4240P
+INPBELI
+INPEMEZ
+INPEMFO
+INPIMPINK
+INPIMPZELF
+INPKKCODE
+INPKKGEM
+INPKKMUT
+INPP100PPRIM
+INPPERSBRUT
+INPPERSINK
+INPPERSPRIM
+INPPG410WW
+INPPG610WAO
+INPPG710PEN
+INPPG810ZFW
+INPPH570ZWP
+INPPH670AOP
+INPPH770OUP
+INPPH780OUV
+INPPH790LLP
+INPPH865ZFW
+INPPH868ZTS
+INPPH880ZKV
+INPPI440WW
+INPPI640WAO
+INPPI840ZFW
+INPPINK
+INPPN400WW
+INPPN700PEN
+INPPN800ZFW
+INPPO830ZFW
+INPPOSHHK
+INPPS850ZFW
+INPPV420WW
+INPPV820ZFW
+INPPZ860ZFW
+INPSBIDGA2008VJJJJ
+INPSBIMEE2008VJJJJ
+INPSBIOVE2008VJJJJ
+INPSBIZLF2008VJJJJ
+INPSZHVZLFGEMJJJJ
+INPT1000WER
+INPT1020AMB
+INPT1030DGN
+INPT1040NAT
+INPT1060OVE
+INPT1068ZVW
+INPT2070WIN
+INPT3080REN
+INPT3100OBL
+INPT3110DAB
+INPT3120DIV
+INPT3140HEW
+INPT3150ONG
+INPT3160OVB
+INPT3170RBW
+INPT3180RST
+INPT3190RBS
+INPT5210WW
+INPT5220WA
+INPT5230ZW
+INPT5240AO
+INPT5250AOP
+INPT5260AOW
+INPT5270AWW
+INPT5280PEN
+INPT5288ZVW
+INPT5290LLP
+INPT6290ABW
+INPT6300DIV
+INPT6318ZVW
+INPT6320KB
+INPT6325KGB
+INPT6330STU
+INPT7340HRS
+INPT7350REW
+INPT7360TSK
+INPT8370ONT
+INPTYPDGA
+INPTYPMEE
+INPTYPOVE
+INPTYPZLF
+INPV0390BET
+INPV3900INK
+INPYBIT2410P
+INPYBIV2420P.
+
+
+RENAME VARIABLES (INPP100PBRUT
+INPSECJ INPP100PPERS = Y23_INPP100PBRUT
+Y23_INPSECJ Y23_INPP100PPERS).
+EXECUTE. 
+
+DATASET CLOSE INPATAB2023.
+
+RECODE Y23_INPP100PBRUT (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y23_INPP100PBRUT_class.
+apply dictionary from */source variables = Y23_INPP100PBRUT /target variables = Y23_INPP100PBRUT_class.
+VALUE LABELS Y23_INPP100PBRUT_class
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+RECODE Y23_INPP100PPERS (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y23_INPP100PPERS_class.
+apply dictionary from */source variables = Y23_INPP100PPERS /target variables = Y23_INPP100PPERS_class.
+VALUE LABELS Y23_INPP100PPERS_class 
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INKOMEN.sav'
+  /COMPRESSED.
+
+
+****************************Schuldsanering toevoegen****************************
+*Interessant of mensen in (recent)verleden in de schuldsanering hebben gezeten. Om deze reden nemen we tot 3 jaar voor het eerste jaar dat er patienten in WoR geincludeerd werden --> 2019.
+
+GET
+  FILE='G:\VeiligheidRecht\WSNPPERSBUS\WSNPPERSBUS2023V1.sav'.
+DATASET NAME SCHULDSAN_19_23.
+
+DELETE VARIABLES Wsnprbnk
+Wsnpsrtbeein
+Wsnpbewid.
+EXECUTE. 
+
+* Define Variable Properties.
+ALTER TYPE  Wsnpdatumtoelaat(SDATE10).
+ALTER TYPE  Wsnpdatumbeein(SDATE10).
+FORMATS  Wsnpdatumtoelaat(SDATE10).
+FORMATS  Wsnpdatumbeein(SDATE10).
+EXECUTE.
+
+
+* 2019.
+COMPUTE Y19_Gewenste_Toelaatdatum = DATE.DMY(31,12,2019).
+COMPUTE Y19_Gewenste_Beeindigdatum = DATE.DMY(01,01,2019).
+FORMATS Y19_Gewenste_Toelaatdatum (SDATE10).
+FORMATS Y19_Gewenste_Beeindigdatum (SDATE10).
+EXECUTE. 
+
+IF (Wsnpdatumtoelaat LE Y19_Gewenste_Toelaatdatum AND Wsnpdatumbeein GE Y19_Gewenste_Beeindigdatum) Y19_Schuldsanering = 1.
+EXECUTE. 
+
+DELETE VARIABLES Y19_Gewenste_Toelaatdatum Y19_Gewenste_Beeindigdatum.
+EXECUTE. 
+
+* 2020.
+COMPUTE Y20_Gewenste_Toelaatdatum = DATE.DMY(31,12,2020).
+COMPUTE Y20_Gewenste_Beeindigdatum = DATE.DMY(01,01,2020).
+FORMATS Y20_Gewenste_Toelaatdatum (SDATE10).
+FORMATS Y20_Gewenste_Beeindigdatum (SDATE10).
+EXECUTE. 
+
+IF (Wsnpdatumtoelaat LE Y20_Gewenste_Toelaatdatum AND Wsnpdatumbeein GE Y20_Gewenste_Beeindigdatum) Y20_Schuldsanering = 1.
+EXECUTE. 
+
+DELETE VARIABLES Y20_Gewenste_Toelaatdatum Y20_Gewenste_Beeindigdatum.
+EXECUTE. 
+
+
+* 2021.
+COMPUTE Y21_Gewenste_Toelaatdatum = DATE.DMY(31,12,2021).
+COMPUTE Y21_Gewenste_Beeindigdatum = DATE.DMY(01,01,2021).
+FORMATS Y21_Gewenste_Toelaatdatum (SDATE10).
+FORMATS Y21_Gewenste_Beeindigdatum (SDATE10).
+EXECUTE. 
+
+IF (Wsnpdatumtoelaat LE Y21_Gewenste_Toelaatdatum AND Wsnpdatumbeein GE Y21_Gewenste_Beeindigdatum) Y21_Schuldsanering = 1.
+EXECUTE. 
+
+DELETE VARIABLES Y21_Gewenste_Toelaatdatum Y21_Gewenste_Beeindigdatum.
+EXECUTE. 
+
+* 2022.
+COMPUTE Y22_Gewenste_Toelaatdatum = DATE.DMY(31,12,2022).
+COMPUTE Y22_Gewenste_Beeindigdatum = DATE.DMY(01,01,2022).
+FORMATS Y22_Gewenste_Toelaatdatum (SDATE10).
+FORMATS Y22_Gewenste_Beeindigdatum (SDATE10).
+EXECUTE. 
+
+IF (Wsnpdatumtoelaat LE Y22_Gewenste_Toelaatdatum AND Wsnpdatumbeein GE Y22_Gewenste_Beeindigdatum) Y22_Schuldsanering = 1.
+EXECUTE. 
+
+DELETE VARIABLES Y22_Gewenste_Toelaatdatum Y22_Gewenste_Beeindigdatum.
+EXECUTE. 
+
+* 2023.
+COMPUTE Y23_Gewenste_Toelaatdatum = DATE.DMY(31,12,2023).
+COMPUTE Y23_Gewenste_Beeindigdatum = DATE.DMY(01,01,2023).
+FORMATS Y23_Gewenste_Toelaatdatum (SDATE10).
+FORMATS Y23_Gewenste_Beeindigdatum (SDATE10).
+EXECUTE. 
+
+IF (Wsnpdatumtoelaat LE Y23_Gewenste_Toelaatdatum AND Wsnpdatumbeein GE Y23_Gewenste_Beeindigdatum) Y23_Schuldsanering = 1.
+EXECUTE. 
+
+DELETE VARIABLES Y23_Gewenste_Toelaatdatum Y23_Gewenste_Beeindigdatum.
+EXECUTE. 
+
+
+FORMATS Y19_Schuldsanering Y20_Schuldsanering Y21_Schuldsanering Y22_Schuldsanering Y23_Schuldsanering (F1.0).
+VARIABLE WIDTH Y19_Schuldsanering Y20_Schuldsanering Y21_Schuldsanering Y22_Schuldsanering Y23_Schuldsanering (4).
+VARIABLE LABELS Y19_Schuldsanering 'Persoon zat in 2019 in een schuldsaneringstraject'.
+VARIABLE LABELS Y20_Schuldsanering 'Persoon zat in 2020 in een schuldsaneringstraject'.
+VARIABLE LABELS Y21_Schuldsanering 'Persoon zat in 2021 in een schuldsaneringstraject'.
+VARIABLE LABELS Y22_Schuldsanering 'Persoon zat in 2022 in een schuldsaneringstraject'.
+VARIABLE LABELS Y23_Schuldsanering 'Persoon zat in 2023 in een schuldsaneringstraject'.
+RECODE Y19_Schuldsanering Y20_Schuldsanering Y21_Schuldsanering Y22_Schuldsanering Y23_Schuldsanering (1=1) (SYSMIS=0).
+VALUE LABELS Y19_Schuldsanering Y20_Schuldsanering Y21_Schuldsanering Y22_Schuldsanering Y23_Schuldsanering 0 'Nee' 1 'Ja'.
+EXECUTE. 
+
+
+* Checken wie tussen 2019 en 2023 in een schuldsaneringstracect zaten om vervolgens degene buiten deze range eruit te halen. 
+IF (Y19_Schuldsanering = 1 OR Y20_Schuldsanering = 1 OR Y21_Schuldsanering = 1 OR Y22_Schuldsanering OR Y23_Schuldsanering = 1) Schhuldsanering =  1.
+EXECUTE. 
+
+SELECT IF (Schhuldsanering = 1). 
+EXECUTE. 
+
+DELETE VARIABLES Wsnpdatumtoelaat
+Wsnpdatumbeein
+Schhuldsanering.
+EXECUTE. 
+
+
+* Het is mogelijk dat mensen terugkeren in de schuldsanering, deze worden dan als nieuwe cases toegevoegd, er zitten dan duplicates in. 
+* Identify Duplicate Cases.
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+
+* Met onderstaande code merge je deze tot 1 uniek persoon.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  /Y19_Schuldsanering_max=MAX(Y19_Schuldsanering) 
+  /Y20_Schuldsanering_max=MAX(Y20_Schuldsanering) 
+  /Y21_Schuldsanering_max=MAX(Y21_Schuldsanering) 
+  /Y22_Schuldsanering_max=MAX(Y22_Schuldsanering)
+  /Y23_Schuldsanering_max=MAX(Y23_Schuldsanering).
+* Vervolgens verwijder je de duplicate cases. 
+SELECT IF (PrimaryLast = 1).
+EXECUTE. 
+* Verwijderen en hernoemen van de variabelen voor verder gebruik. 
+DELETE VARIABLES 
+Y19_Schuldsanering
+Y20_Schuldsanering
+Y21_Schuldsanering
+Y22_Schuldsanering
+Y23_Schuldsanering
+PrimaryLast.
+EXECUTE. 
+RENAME VARIABLES (
+Y19_Schuldsanering_max
+Y20_Schuldsanering_max
+Y21_Schuldsanering_max
+Y22_Schuldsanering_max
+Y23_Schuldsanering_max = 
+Y19_Schuldsanering
+Y20_Schuldsanering
+Y21_Schuldsanering
+Y22_Schuldsanering
+Y23_Schuldsanering).
+EXECUTE. 
+
+DATASET NAME SCHULDSAN_19_23.
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\Schuldsanering_2019-2023.sav'
+  /COMPRESSED.
+
+*Koppelen aan hoofdbestand.
+GET FILE ='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INKOMEN.sav'.
+DATASET NAME INK.
+DATASET ACTIVATE INK.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE SCHULDSAN_19_23.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INK.
+MATCH FILES /FILE=INK
+  /TABLE='SCHULDSAN_19_23'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET NAME INK_SCHULD.
+DATASET CLOSE SCHULDSAN_19_23.
+DATASET CLOSE INK.
+
+SAVE OUTFILE = 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INKOMEN_SCHULD.sav'.
+DATASET CLOSE INK_SCHULD.
+
+************************************************Wanbetaler zorgverzekeringswet toevoegen***************************************************************
+
+*Eerst alle jaren samenvoegen en de variabele 1 of 0 voor wanbetaler en daarna koppelen aan grote bestand?
+
+* 2019.
+GET FILE='G:\GezondheidWelzijn\WANBZVWTAB\2019\WANBZVW2019TABV1.sav'.
+DATASET NAME WANB19.
+
+COMPUTE Y19_WanbetalerZorgver = 1.
+VARIABLE LABELS Y19_WanbetalerZorgver 'Persoon geregistreerd als wanbetaler zorgverzekering'.
+FORMATS Y19_WanbetalerZorgver (F1.0).
+VALUE LABELS Y19_WanbetalerZorgver 1 'Ja'.
+EXECUTE. 
+
+SAVE OUTFILE ='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WANB19.sav'.
+
+* 2020.
+GET FILE='G:\GezondheidWelzijn\WANBZVWTAB\2020\WANBZVW2020TABV1.sav'.
+DATASET NAME WANB2020.
+
+COMPUTE Y20_WanbetalerZorgver = 1.
+VARIABLE LABELS Y20_WanbetalerZorgver 'Persoon geregistreerd als wanbetaler zorgverzekering'.
+FORMATS Y20_WanbetalerZorgver (F1.0).
+VALUE LABELS Y20_WanbetalerZorgver 1 'Ja'.
+EXECUTE. 
+
+DATASET ACTIVATE WANB19.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB2020.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB19.
+MATCH FILES /FILE=*
+  /FILE='WANB2020'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME WANB19_20.
+
+SAVE OUTFILE ='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WANB19_20.sav'.
+
+
+* 2021.
+GET FILE='G:\GezondheidWelzijn\WANBZVWTAB\2021\WANBZVW2021TABV1.sav'.
+DATASET NAME WANB2021.
+
+COMPUTE Y21_WanbetalerZorgver = 1.
+VARIABLE LABELS Y21_WanbetalerZorgver 'Persoon geregistreerd als wanbetaler zorgverzekering'.
+FORMATS Y21_WanbetalerZorgver (F1.0).
+VALUE LABELS Y21_WanbetalerZorgver 1 'Ja'.
+EXECUTE. 
+
+DATASET ACTIVATE WANB19_20.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB2021.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB19_20.
+MATCH FILES /FILE=*
+  /FILE='WANB2021'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME WANB19_21.
+
+DATASET CLOSE WANB2021.
+SAVE OUTFILE ='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WANB19_21.sav'.
+
+* 2022.
+GET FILE='G:\GezondheidWelzijn\WANBZVWTAB\2022\WANBZVW2022TABV1.sav'.
+DATASET NAME WANB2022.
+
+COMPUTE Y22_WanbetalerZorgver = 1.
+VARIABLE LABELS Y22_WanbetalerZorgver 'Persoon geregistreerd als wanbetaler zorgverzekering'.
+FORMATS Y22_WanbetalerZorgver (F1.0).
+VALUE LABELS Y22_WanbetalerZorgver 1 'Ja'.
+EXECUTE. 
+
+DATASET ACTIVATE WANB19_21.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB2022.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB19_21.
+MATCH FILES /FILE=*
+  /FILE='WANB2022'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME WANB19_22.
+
+
+DATASET CLOSE WANB2022.
+SAVE OUTFILE ='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WANB19_22.sav'.
+
+
+GET FILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WANB19_22.sav'.
+DATASET NAME WANB19_22.
+* 2023.
+GET FILE='G:\GezondheidWelzijn\WANBZVWTAB\2023\WANBZVW2023TABV1.sav'.
+DATASET NAME WANB2023.
+
+COMPUTE Y23_WanbetalerZorgver = 1.
+VARIABLE LABELS Y23_WanbetalerZorgver 'Persoon geregistreerd als wanbetaler zorgverzekering'.
+FORMATS Y23_WanbetalerZorgver (F1.0).
+VALUE LABELS Y23_WanbetalerZorgver 1 'Ja'.
+EXECUTE. 
+
+DATASET ACTIVATE WANB19_22.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB2023.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB19_22.
+MATCH FILES /FILE=*
+  /FILE='WANB2023'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME WANB19_23.
+
+DATASET CLOSE WANB2023.
+SAVE OUTFILE ='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WANB19_23.sav'.
+
+VARIABLE WIDTH 
+Y19_WanbetalerZorgver
+Y20_WanbetalerZorgver
+Y21_WanbetalerZorgver
+Y22_WanbetalerZorgver
+Y23_WanbetalerZorgver(5).
+EXECUTE.
+
+***NU KOPPELEN AAN DE VOLLEDIGE DATASET****
+
+GET
+  FILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GemWijk_GBA_INKOMEN_SCHULD.sav'.
+DATASET NAME INK_SCHULD.
+DATASET ACTIVATE WANB19_23.
+
+DATASET ACTIVATE INK_SCHULD.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB19_23.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INK_SCHULD.
+MATCH FILES /FILE=*
+  /TABLE='WANB19_23'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME WOR_FIN.
+
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\WOR_FIN.sav'
+  /COMPRESSED.
+
+********************************************************************************************************************************************************************
+******************************************KOSTEN EN (ZORG)GEBRUIK TOEVOEGEN**********************************************************
+
+********************************************************************************************************************************************************************
+
+******** ZORGKOSTEN**********.
+*** 2019.
+
+GET FILE='G:\GezondheidWelzijn\ZVWZORGKOSTENTAB\2019\ZVWZORGKOSTEN2019TABV2.sav'.
+DATASET NAME Hoofdbestand.
+
+DELETE VARIABLES
+NOPZVWKFYSIOTHERAPIE
+NOPZVWKPARAMEDISCHOV
+NOPZVWKVERLOSKUNDE
+NOPZVWKKRAAMZORG
+NOPZVWKGGZMV
+NOPZVWKGGZZVINST
+NOPZVWKGGZZVZELF
+NOPZVWKGGZOVERIG
+NOPZVWKZIEKENVERVOERZIT
+NOPZVWKZIEKENVERVOERLIG
+NOPZVWKLANGDGGZ
+NOPZVWKBUITENLGRENS
+NOPZVWKBUITENLZINL
+NOPZVWKVRIJWILLIGEIGENRISICO.
+EXECUTE.
+
+RENAME VARIABLES (ZVWKOPHOOGFACTOR
+ZVWKHUISARTS
+NOPZVWKEERSTELIJNSOND
+NOPZVWKHUISARTSINSCHRIJF
+NOPZVWKHUISARTSCONSULT
+NOPZVWKHUISARTSOVERIG
+ZVWKFARMACIE
+ZVWKMONDZORG
+ZVWKZIEKENHUIS
+ZVWKPARAMEDISCH
+ZVWKHULPMIDDEL
+ZVWKZIEKENVERVOER
+ZVWKGEBOORTEZORG
+ZVWKBUITENLAND
+ZVWKOVERIG
+ZVWKEERSTELIJNSPSYCHO
+ZVWKGGZ
+ZVWKGENBASGGZ
+ZVWKSPECGGZ
+ZVWKGERIATRISCH
+ZVWKWYKVERPLEGING 
+ZVWKMULTIDISC
+ZVWKZINTUIGLIJK 
+ZVWKTOTAAL 
+ZVWKEERSTELIJNSVERBLIJF = Y19_ZVWKOPHOOGFACTOR
+Y19_ZVWKHUISARTS
+Y19_NOPZVWKEERSTELIJNSOND
+Y19_NOPZVWKHUISARTSINSCHRIJF
+Y19_NOPZVWKHUISARTSCONSULT
+Y19_NOPZVWKHUISARTSOVERIG
+Y19_ZVWKFARMACIE
+Y19_ZVWKMONDZORG
+Y19_ZVWKZIEKENHUIS
+Y19_ZVWKPARAMEDISCH
+Y19_ZVWKHULPMIDDEL
+Y19_ZVWKZIEKENVERVOER
+Y19_ZVWKGEBOORTEZORG
+Y19_ZVWKBUITENLAND
+Y19_ZVWKOVERIG
+Y19_ZVWKEERSTELIJNSPSYCHO
+Y19_ZVWKGGZ
+Y19_ZVWKGENBASGGZ
+Y19_ZVWKSPECGGZ
+Y19_ZVWKGERIATRISCH
+Y19_ZVWKWYKVERPLEGING
+Y19_ZVWKMULTIDISC
+Y19_ZVWKZINTUIGLIJK
+Y19_ZVWKTOTAAL
+Y19_ZVWKEERSTELIJNSVERBLIJF).
+EXECUTE.
+
+* 2020: COMPLEET.
+
+DATASET ACTIVATE Hoofdbestand.
+GET FILE='G:\GezondheidWelzijn\ZVWZORGKOSTENTAB\2020\ZVWZORGKOSTEN2020TABV2.sav'.
+DATASET NAME Zorgkosten2020.
+DATASET ACTIVATE Hoofdbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Zorgkosten2020.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Hoofdbestand.
+MATCH FILES /FILE=*
+  /FILE='Zorgkosten2020'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Zorgkosten2020.
+
+DELETE VARIABLES
+NOPZVWKFYSIOTHERAPIE
+NOPZVWKPARAMEDISCHOV
+NOPZVWKVERLOSKUNDE
+NOPZVWKKRAAMZORG
+NOPZVWKGGZMV
+NOPZVWKGGZZVINST
+NOPZVWKGGZZVZELF
+NOPZVWKGGZOVERIG
+NOPZVWKZIEKENVERVOERZIT
+NOPZVWKZIEKENVERVOERLIG
+NOPZVWKLANGDGGZ
+NOPZVWKBUITENLGRENS
+NOPZVWKBUITENLZINL
+NOPZVWKVRIJWILLIGEIGENRISICO
+NOPGENZORGSPECPATGROEP.
+EXECUTE.
+
+RENAME VARIABLES (ZVWKOPHOOGFACTOR
+ZVWKHUISARTS
+NOPZVWKEERSTELIJNSOND
+NOPZVWKHUISARTSINSCHRIJF
+NOPZVWKHUISARTSCONSULT
+NOPZVWKHUISARTSOVERIG
+ZVWKFARMACIE
+ZVWKMONDZORG
+ZVWKZIEKENHUIS
+ZVWKPARAMEDISCH
+ZVWKHULPMIDDEL
+ZVWKZIEKENVERVOER
+ZVWKGEBOORTEZORG
+ZVWKBUITENLAND
+ZVWKOVERIG
+ZVWKEERSTELIJNSPSYCHO
+ZVWKGGZ
+ZVWKGENBASGGZ
+ZVWKSPECGGZ
+ZVWKGERIATRISCH
+ZVWKWYKVERPLEGING 
+ZVWKMULTIDISC
+ZVWKZINTUIGLIJK 
+ZVWKTOTAAL 
+ZVWKEERSTELIJNSVERBLIJF = Y20_ZVWKOPHOOGFACTOR
+Y20_ZVWKHUISARTS
+Y20_NOPZVWKEERSTELIJNSOND
+Y20_NOPZVWKHUISARTSINSCHRIJF
+Y20_NOPZVWKHUISARTSCONSULT
+Y20_NOPZVWKHUISARTSOVERIG
+Y20_ZVWKFARMACIE
+Y20_ZVWKMONDZORG
+Y20_ZVWKZIEKENHUIS
+Y20_ZVWKPARAMEDISCH
+Y20_ZVWKHULPMIDDEL
+Y20_ZVWKZIEKENVERVOER
+Y20_ZVWKGEBOORTEZORG
+Y20_ZVWKBUITENLAND
+Y20_ZVWKOVERIG
+Y20_ZVWKEERSTELIJNSPSYCHO
+Y20_ZVWKGGZ
+Y20_ZVWKGENBASGGZ
+Y20_ZVWKSPECGGZ
+Y20_ZVWKGERIATRISCH
+Y20_ZVWKWYKVERPLEGING
+Y20_ZVWKMULTIDISC
+Y20_ZVWKZINTUIGLIJK
+Y20_ZVWKTOTAAL
+Y20_ZVWKEERSTELIJNSVERBLIJF).
+EXECUTE.
+
+DATASET NAME ZORGKOSTEN_TOTAAL.
+
+* 2021: COMPLEET.
+
+DATASET ACTIVATE ZORGKOSTEN_TOTAAL.
+GET FILE='G:\GezondheidWelzijn\ZVWZORGKOSTENTAB\2021\ZVWZORGKOSTEN2021TABV1.sav'.
+DATASET NAME Zorgkosten2021.
+DATASET ACTIVATE ZORGKOSTEN_TOTAAL.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Zorgkosten2021.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE ZORGKOSTEN_TOTAAL.
+MATCH FILES /FILE=*
+  /FILE='Zorgkosten2021'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+DATASET NAME ZORGKOSTEN_TOTAAL.
+DATASET CLOSE Zorgkosten2021.
+
+DELETE VARIABLES
+NOPZVWKFYSIOTHERAPIE
+NOPZVWKPARAMEDISCHOV
+NOPZVWKVERLOSKUNDE
+NOPZVWKKRAAMZORG
+NOPZVWKGGZMV
+NOPZVWKGGZZVINST
+NOPZVWKGGZZVZELF
+NOPZVWKGGZOVERIG
+NOPZVWKZIEKENVERVOERZIT
+NOPZVWKZIEKENVERVOERLIG
+NOPZVWKLANGDGGZ
+NOPZVWKBUITENLGRENS
+NOPZVWKBUITENLZINL
+NOPZVWKVRIJWILLIGEIGENRISICO
+NOPGENZORGSPECPATGROEP
+NOPZVWKINTGEBOORTEZORG
+NOPZVWKINNOVATIEGGZ.
+EXECUTE.
+
+RENAME VARIABLES (ZVWKOPHOOGFACTOR
+ZVWKHUISARTS
+NOPZVWKEERSTELIJNSOND
+NOPZVWKHUISARTSINSCHRIJF
+NOPZVWKHUISARTSCONSULT
+NOPZVWKHUISARTSOVERIG
+ZVWKFARMACIE
+ZVWKMONDZORG
+ZVWKZIEKENHUIS
+ZVWKPARAMEDISCH
+ZVWKHULPMIDDEL
+ZVWKZIEKENVERVOER
+ZVWKGEBOORTEZORG
+ZVWKBUITENLAND
+ZVWKOVERIG
+ZVWKEERSTELIJNSPSYCHO
+ZVWKGGZ
+ZVWKGENBASGGZ
+ZVWKSPECGGZ
+ZVWKGERIATRISCH
+ZVWKWYKVERPLEGING 
+ZVWKMULTIDISC
+ZVWKZINTUIGLIJK 
+ZVWKTOTAAL 
+ZVWKEERSTELIJNSVERBLIJF = Y21_ZVWKOPHOOGFACTOR
+Y21_ZVWKHUISARTS
+Y21_NOPZVWKEERSTELIJNSOND
+Y21_NOPZVWKHUISARTSINSCHRIJF
+Y21_NOPZVWKHUISARTSCONSULT
+Y21_NOPZVWKHUISARTSOVERIG
+Y21_ZVWKFARMACIE
+Y21_ZVWKMONDZORG
+Y21_ZVWKZIEKENHUIS
+Y21_ZVWKPARAMEDISCH
+Y21_ZVWKHULPMIDDEL
+Y21_ZVWKZIEKENVERVOER
+Y21_ZVWKGEBOORTEZORG
+Y21_ZVWKBUITENLAND
+Y21_ZVWKOVERIG
+Y21_ZVWKEERSTELIJNSPSYCHO
+Y21_ZVWKGGZ
+Y21_ZVWKGENBASGGZ
+Y21_ZVWKSPECGGZ
+Y21_ZVWKGERIATRISCH
+Y21_ZVWKWYKVERPLEGING
+Y21_ZVWKMULTIDISC
+Y21_ZVWKZINTUIGLIJK
+Y21_ZVWKTOTAAL
+Y21_ZVWKEERSTELIJNSVERBLIJF).
+EXECUTE.
+
+***************************** 2022****************************************
+
+DATASET ACTIVATE ZORGKOSTEN_TOTAAL.
+GET FILE='G:\GezondheidWelzijn\ZVWZORGKOSTENTAB\2022\ZVWZORGKOSTEN2022TABV1.sav'.
+DATASET NAME Zorgkosten2022.
+DATASET ACTIVATE ZORGKOSTEN_TOTAAL.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Zorgkosten2022.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE ZORGKOSTEN_TOTAAL.
+MATCH FILES /FILE=*
+  /FILE='Zorgkosten2022'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Zorgkosten2022.
+
+DELETE VARIABLES
+NOPZVWKFYSIOTHERAPIE
+NOPZVWKPARAMEDISCHOV
+NOPZVWKVERLOSKUNDE
+NOPZVWKKRAAMZORG
+NOPZVWKGGZMV
+NOPZVWKGGZZVINST
+NOPZVWKGGZZVZELF
+NOPZVWKGGZOVERIG
+NOPZVWKZIEKENVERVOERZIT
+NOPZVWKZIEKENVERVOERLIG
+NOPZVWKLANGDGGZ
+NOPZVWKBUITENLGRENS
+NOPZVWKBUITENLZINL
+NOPZVWKVRIJWILLIGEIGENRISICO
+NOPGENZORGSPECPATGROEP
+NOPZVWKINTGEBOORTEZORG
+NOPZVWKINNOVATIEGGZ.
+EXECUTE.
+
+RENAME VARIABLES (ZVWKOPHOOGFACTOR
+ZVWKHUISARTS
+NOPZVWKEERSTELIJNSOND
+NOPZVWKHUISARTSINSCHRIJF
+NOPZVWKHUISARTSCONSULT
+NOPZVWKHUISARTSOVERIG
+ZVWKFARMACIE
+ZVWKMONDZORG
+ZVWKZIEKENHUIS
+ZVWKPARAMEDISCH
+ZVWKHULPMIDDEL
+ZVWKZIEKENVERVOER
+ZVWKGEBOORTEZORG
+ZVWKBUITENLAND
+ZVWKOVERIG
+ZVWKEERSTELIJNSPSYCHO
+ZVWKGGZ
+ZVWKGENBASGGZ
+ZVWKSPECGGZ
+ZVWKGERIATRISCH
+ZVWKWYKVERPLEGING 
+ZVWKMULTIDISC
+ZVWKZINTUIGLIJK 
+ZVWKTOTAAL 
+ZVWKEERSTELIJNSVERBLIJF = Y22_ZVWKOPHOOGFACTOR
+Y22_ZVWKHUISARTS
+Y22_NOPZVWKEERSTELIJNSOND
+Y22_NOPZVWKHUISARTSINSCHRIJF
+Y22_NOPZVWKHUISARTSCONSULT
+Y22_NOPZVWKHUISARTSOVERIG
+Y22_ZVWKFARMACIE
+Y22_ZVWKMONDZORG
+Y22_ZVWKZIEKENHUIS
+Y22_ZVWKPARAMEDISCH
+Y22_ZVWKHULPMIDDEL
+Y22_ZVWKZIEKENVERVOER
+Y22_ZVWKGEBOORTEZORG
+Y22_ZVWKBUITENLAND
+Y22_ZVWKOVERIG
+Y22_ZVWKEERSTELIJNSPSYCHO
+Y22_ZVWKGGZ
+Y22_ZVWKGENBASGGZ
+Y22_ZVWKSPECGGZ
+Y22_ZVWKGERIATRISCH
+Y22_ZVWKWYKVERPLEGING
+Y22_ZVWKMULTIDISC
+Y22_ZVWKZINTUIGLIJK
+Y22_ZVWKTOTAAL
+Y22_ZVWKEERSTELIJNSVERBLIJF).
+EXECUTE.
+
+
+*** vanaf 2022 nieuwe variabelen toegevoegd, ook van deze variabelen moeten de namen aangepast worden. 
+RENAME VARIABLES (ZVWKGGZZPMTOTAAL
+NOPZVWKGGZZPMCONSULT
+NOPZVWKGGZZPMVERBLIJF
+NOPZVWKGGZZPMOVERIGPREST 
+ = Y22_ZVWKGGZZPMTOTAAL
+Y22_NOPZVWKGGZZPMCONSULT
+Y22_NOPZVWKGGZZPMVERBLIJF
+Y22_NOPZVWKGGZZPMOVERIGPREST).
+EXECUTE.
+
+DATASET ACTIVATE ZORGKOSTEN_TOTAAL.
+ SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\zorgkosten.sav'.
+
+****************************************************************************
+ * Bestanden Update
+*****************************************************************************.
+
+DELETE VARIABLES 
+Y19_ZVWKOPHOOGFACTOR
+Y20_ZVWKOPHOOGFACTOR
+Y21_ZVWKOPHOOGFACTOR
+Y22_ZVWKOPHOOGFACTOR.
+EXECUTE.
+
+* FOUTIEVE VARIABLE LABELS HERFORMULEREN. 
+VARIABLE LABELS Y19_ZVWKMULTIDISC 'Kosten van multidisciplinaire zorg binnen de basisverzekering'. 
+VARIABLE LABELS Y20_ZVWKMULTIDISC 'Kosten van multidisciplinaire zorg binnen de basisverzekering'. 
+VARIABLE LABELS Y21_ZVWKMULTIDISC 'Kosten van multidisciplinaire zorg binnen de basisverzekering'. 
+VARIABLE LABELS Y22_ZVWKMULTIDISC 'Kosten van multidisciplinaire zorg binnen de basisverzekering'.
+EXECUTE. 
+
+* VERWIJDEREN VARIABELEN WELKE NIET AANWEZIG ZIJN.
+DELETE VARIABLES 
+Y19_ZVWKEERSTELIJNSPSYCHO
+Y19_ZVWKGGZ
+Y20_ZVWKEERSTELIJNSPSYCHO
+Y20_ZVWKGGZ
+Y21_ZVWKEERSTELIJNSPSYCHO
+Y21_ZVWKGGZ
+Y22_ZVWKEERSTELIJNSPSYCHO
+Y22_ZVWKGGZ.
+EXECUTE. 
+DATASET NAME ZORGKOSTEN_TOTAAL.
+
+GET FILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\WOR_FIN.sav'.
+DATASET NAME BASIS.
+
+DATASET ACTIVATE BASIS.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE ZORGKOSTEN_TOTAAL.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS.
+MATCH FILES /FILE=*
+  /TABLE='ZORGKOSTEN_TOTAAL'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME BASIS_ZKOSTEN.
+
+ SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK.sav'
+  /COMPRESSED.
+
+
+
+*************************************Specialistische GGZ gebruik*********************************************.
+
+*Kleine groep dus heeft geen nut om onderscheid te maken tussen de soorten diagnoses (zijn er 20). Daarom alleen kijken of iemand gebruik maakt van de specialistische GGZ ja of nee.
+* Mocht de sample groeien, dan is het mogelijk wel interessant (voor een goede syntax, zie syndemics gezamelijke bestanden, ggz).
+
+*Stap 1: is iedereen in het bestand een 1 geven (want maakt gebruik van specialistische GGZ)
+*Stap 2: het is mogelijk dat iemand verschillende soorten trajecten tegelijk heeft, daarom uniek maken.
+*Stap 3: Koppelen van de bestanden (eerst alle jaren aan elkaar en daarna aan het grote bestand).
+
+
+****************2019****************
+
+GET
+  FILE='G:\GezondheidWelzijn\GGZDBCTRAJECTENHOOFDDIAGTAB\GGZDBCtrajectenHOOFDDIAG2019TABV3.sav'.
+DATASET NAME GGZ_19 WINDOW=FRONT.
+
+COMPUTE Y19_GGZ_zorggebruik = 1.
+VARIABLE LABELS Y19_GGZ_zorggebruik 'Persoon geregistreerd als gebruiker van specialistische GGZ zorg'.
+EXECUTE.
+
+DELETE VARIABLES 
+GGZInstelling
+GGZLocatie
+GGZDBCZorgtrajectnummerHOOFDDIAG
+GGZDBCtrajectnummerHOOFDDIAG
+GGZDBCBegindatumHOOFDDIAG
+GGZDBCEinddatumHOOFDDIAG
+GGZDBCStartdatumZTRHOOFDDIAG
+GGZDBCEinddatumZTRHOOFDDIAG
+GGZDBCVerzekeraarHOOFDDIAG
+GGZDBCZorgtypeHOOFDDIAG
+GGZDBCCircuitHOOFDDIAG
+GGZDBCSluitredenHOOFDDIAG
+GGZDBCProductgroepcodeHOOFDDIAG
+GGZDBCDeclaratiecodeHOOFDDIAG
+GGZDBCHoofddiagnoseDSMIVHOOFDDIAG
+GGZDBCLaatsteContactdatumDBCHOOFDDIAG
+GGZDBCVerblijfdagenHOOFDDIAG
+GGZDBCVerblijf2015HOOFDDIAG
+GGZDBCVerblijf2016HOOFDDIAG
+GGZDBCVerblijf2017HOOFDDIAG
+GGZDBCVerblijf2018HOOFDDIAG
+GGZDBCVerblijf2019HOOFDDIAG
+GGZDBCVerblijf2020HOOFDDIAG
+GGZDBCOphooggewichtHOOFDDIAG.
+EXECUTE.
+
+* Het is mogelijk dat mensen terugkeren in de GGZ, deze worden dan als nieuwe cases toegevoegd, er zitten dan duplicates in. 
+* Identify Duplicate Cases.
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+
+* Met onderstaande code merge je deze tot 1 uniek persoon.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  /Y19_GGZ_zorggebruik_max=MAX(Y19_GGZ_zorggebruik).
+* Vervolgens verwijder je de duplicate cases. 
+SELECT IF (PrimaryLast = 1).
+EXECUTE. 
+* Verwijderen en hernoemen van de variabelen voor verder gebruik. 
+DELETE VARIABLES 
+Y19_GGZ_zorggebruik
+PrimaryLast.
+EXECUTE. 
+
+RENAME VARIABLES (
+Y19_GGZ_zorggebruik_max = 
+Y19_GGZ_zorggebruik).
+EXECUTE. 
+
+
+DATASET NAME GGZ_19.
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GGZ_19.sav'
+  /COMPRESSED.
+
+****************2020****************
+
+GET
+  FILE='G:\GezondheidWelzijn\GGZDBCTRAJECTENHOOFDDIAGTAB\GGZDBCtrajectenHOOFDDIAG2020TABV2.sav'.
+DATASET NAME GGZ_20 WINDOW=FRONT.
+
+COMPUTE Y20_GGZ_zorggebruik = 1.
+VARIABLE LABELS Y20_GGZ_zorggebruik 'Persoon geregistreerd als gebruiker van specialistische GGZ zorg'.
+EXECUTE.
+
+DELETE VARIABLES 
+GGZInstelling
+GGZLocatie
+GGZDBCZorgtrajectnummerHOOFDDIAG
+GGZDBCtrajectnummerHOOFDDIAG
+GGZDBCBegindatumHOOFDDIAG
+GGZDBCEinddatumHOOFDDIAG
+GGZDBCStartdatumZTRHOOFDDIAG
+GGZDBCEinddatumZTRHOOFDDIAG
+GGZDBCVerzekeraarHOOFDDIAG
+GGZDBCZorgtypeHOOFDDIAG
+GGZDBCCircuitHOOFDDIAG
+GGZDBCSluitredenHOOFDDIAG
+GGZDBCProductgroepcodeHOOFDDIAG
+GGZDBCDeclaratiecodeHOOFDDIAG
+GGZDBCHoofddiagnoseDSMIVHOOFDDIAG
+GGZDBCLaatsteContactdatumDBCHOOFDDIAG
+GGZDBCVerblijfdagenHOOFDDIAG
+GGZDBCVerblijf2015HOOFDDIAG
+GGZDBCVerblijf2016HOOFDDIAG
+GGZDBCVerblijf2017HOOFDDIAG
+GGZDBCVerblijf2018HOOFDDIAG
+GGZDBCVerblijf2019HOOFDDIAG
+GGZDBCVerblijf2020HOOFDDIAG
+GGZDBCOphooggewichtHOOFDDIAG
+GGZDBCVerblijf2021HOOFDDIAG.
+EXECUTE.
+
+* Het is mogelijk dat mensen terugkeren in de GGZ, deze worden dan als nieuwe cases toegevoegd, er zitten dan duplicates in. 
+* Identify Duplicate Cases.
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+
+* Met onderstaande code merge je deze tot 1 uniek persoon.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  /Y20_GGZ_zorggebruik_max=MAX(Y20_GGZ_zorggebruik).
+* Vervolgens verwijder je de duplicate cases. 
+SELECT IF (PrimaryLast = 1).
+EXECUTE. 
+* Verwijderen en hernoemen van de variabelen voor verder gebruik. 
+DELETE VARIABLES 
+Y20_GGZ_zorggebruik
+PrimaryLast.
+EXECUTE. 
+
+RENAME VARIABLES (
+Y20_GGZ_zorggebruik_max = 
+Y20_GGZ_zorggebruik).
+EXECUTE. 
+
+
+DATASET NAME GGZ_20.
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GGZ_20.sav'
+  /COMPRESSED.
+
+****************2021****************
+
+GET
+  FILE='G:\GezondheidWelzijn\GGZDBCTRAJECTENHOOFDDIAGTAB\GGZDBCtrajectenHOOFDDIAG2021TABV2.sav'.
+DATASET NAME GGZ_21 WINDOW=FRONT.
+
+COMPUTE Y21_GGZ_zorggebruik = 1.
+VARIABLE LABELS Y21_GGZ_zorggebruik 'Persoon geregistreerd als gebruiker van specialistische GGZ zorg'.
+EXECUTE.
+
+DELETE VARIABLES 
+GGZInstelling
+GGZLocatie
+GGZDBCZorgtrajectnummerHOOFDDIAG
+GGZDBCtrajectnummerHOOFDDIAG
+GGZDBCBegindatumHOOFDDIAG
+GGZDBCEinddatumHOOFDDIAG
+GGZDBCStartdatumZTRHOOFDDIAG
+GGZDBCEinddatumZTRHOOFDDIAG
+GGZDBCVerzekeraarHOOFDDIAG
+GGZDBCZorgtypeHOOFDDIAG
+GGZDBCCircuitHOOFDDIAG
+GGZDBCSluitredenHOOFDDIAG
+GGZDBCProductgroepcodeHOOFDDIAG
+GGZDBCDeclaratiecodeHOOFDDIAG
+GGZDBCHoofddiagnoseDSMIVHOOFDDIAG
+GGZDBCLaatsteContactdatumDBCHOOFDDIAG
+GGZDBCVerblijfdagenHOOFDDIAG
+GGZDBCVerblijf2015HOOFDDIAG
+GGZDBCVerblijf2016HOOFDDIAG
+GGZDBCVerblijf2017HOOFDDIAG
+GGZDBCVerblijf2018HOOFDDIAG
+GGZDBCVerblijf2019HOOFDDIAG
+GGZDBCVerblijf2020HOOFDDIAG
+GGZDBCOphooggewichtHOOFDDIAG
+GGZDBCVerblijf2021HOOFDDIAG.
+EXECUTE.
+
+* Het is mogelijk dat mensen terugkeren in de GGZ, deze worden dan als nieuwe cases toegevoegd, er zitten dan duplicates in. 
+* Identify Duplicate Cases.
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+
+* Met onderstaande code merge je deze tot 1 uniek persoon.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  /Y21_GGZ_zorggebruik_max=MAX(Y21_GGZ_zorggebruik).
+* Vervolgens verwijder je de duplicate cases. 
+SELECT IF (PrimaryLast = 1).
+EXECUTE. 
+* Verwijderen en hernoemen van de variabelen voor verder gebruik. 
+DELETE VARIABLES 
+Y21_GGZ_zorggebruik
+PrimaryLast.
+EXECUTE. 
+
+RENAME VARIABLES (
+Y21_GGZ_zorggebruik_max = 
+Y21_GGZ_zorggebruik).
+EXECUTE. 
+
+DATASET NAME GGZ_21.
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GGZ_21.sav'
+  /COMPRESSED.
+
+*********Alles koppelen aan elkaar********
+
+DATASET ACTIVATE GGZ_19.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GGZ_20.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GGZ_19.
+MATCH FILES /FILE=*
+  /FILE='GGZ_20'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME GGZ19_20.
+DATASET CLOSE GGZ_20.
+
+
+DATASET ACTIVATE GGZ19_20.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GGZ_21.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GGZ19_20.
+MATCH FILES /FILE=*
+  /FILE='GGZ_21'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME GGZ19_21.
+DATASET CLOSE GGZ_21.
+
+RECODE Y19_GGZ_zorggebruik Y20_GGZ_zorggebruik Y21_GGZ_zorggebruik (1=1) (SYSMIS=0).
+VALUE LABELS Y19_GGZ_zorggebruik Y20_GGZ_zorggebruik Y21_GGZ_zorggebruik 0 'Nee' 1 'Ja'.
+EXECUTE.
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GGZ19_21.sav'
+  /COMPRESSED.
+
+***Koppelen aan totaalbestand******
+
+GET FILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK.sav".
+DATASET NAME BASIS_ZKOSTEN.
+GET FILE 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\GGZ19_21.sav'.
+DATASET NAME GGZ19_21.
+
+DATASET ACTIVATE BASIS_ZKOSTEN.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GGZ19_21.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS_ZKOSTEN.
+MATCH FILES /FILE=*
+  /TABLE='GGZ19_21'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME ZKOSTEN_GGZ.
+
+RECODE Y19_GGZ_zorggebruik Y20_GGZ_zorggebruik Y21_GGZ_zorggebruik (1=1) (SYSMIS=0).
+VALUE LABELS Y19_GGZ_zorggebruik Y20_GGZ_zorggebruik Y21_GGZ_zorggebruik 0 'Nee' 1 'Ja'.
+EXECUTE.
+
+SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK_GGZ.sav'
+  /COMPRESSED.
+
+
+******************WMO**************************
+*Zowel gemeente als CBS data.
+
+*Stap 1 variabelen aanmaken of iemand wel of niet gebruik maakt van WMO (per jaar).
+*Stap 2 Variabele per jaar aanmaken van de totale kosten
+*Stap 3 aggregate en select duplicates + delete
+--> Omdat ik nu vasthoud aan 2019 en verder heb ik de oude dataset van de gemeente niet meer nodig. 
+
+
+GET FILE = 'H:\Datavoorbereiding\NWA\Roos\20240523_kostenwmo_2019_2020_2021_2022_2023_gemeenteDenHaag_Upload_2024.sav'.
+DATASET NAME WMO19_23 WINDOW=FRONT.
+
+*stap 1: maakt iemand gebruik van WMO?.
+COMPUTE Y19_WMO = 0. 
+EXECUTE.
+IF (jaar = 2019) Y19_WMO = 1.
+EXECUTE.
+
+COMPUTE Y20_WMO = 0.
+EXECUTE.
+IF (jaar = 2020) Y20_WMO = 1.
+EXECUTE.
+
+
+COMPUTE Y21_WMO = 0.
+EXECUTE.
+IF (jaar = 2021) Y21_WMO = 1.
+EXECUTE.
+
+COMPUTE Y22_WMO = 0.
+EXECUTE.
+IF (jaar = 2022) Y22_WMO = 1.
+EXECUTE.
+
+
+COMPUTE Y23_WMO = 0.
+EXECUTE.
+IF (jaar = 2023) Y23_WMO = 1.
+EXECUTE.
+
+** stap 2: Ook totale wmo kosten wil ik uiteindelijk weten.  
+DATASET ACTIVATE WMO19_23.
+
+DO IF jaar = 2019. 
+COMPUTE Y19_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y19_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DO IF jaar = 2020. 
+COMPUTE Y20_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y20_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DO IF jaar = 2021. 
+COMPUTE Y21_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y21_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DO IF jaar = 2022. 
+COMPUTE Y22_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y22_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DO IF jaar = 2023. 
+COMPUTE Y23_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y23_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DELETE VARIABLES
+VV_totaal
+Woon_totaal
+HH
+Begeleiding_dagbesteding
+Beschermd_wonen_Opvang
+jaar
+Wmo_totaal.
+EXECUTE.
+
+
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  /Y19_WMO_max=MAX(Y19_WMO) 
+  /Y20_WMO_max=MAX(Y20_WMO) 
+  /Y21_WMO_max=MAX(Y21_WMO)
+  /Y22_WMO_max=MAX(Y22_WMO) 
+  /Y23_WMO_max=MAX(Y23_WMO) 
+  /Y19_WMO_KOSTEN_max=MAX(Y19_WMO_KOSTEN)
+  /Y20_WMO_KOSTEN_max=MAX(Y20_WMO_KOSTEN)
+  /Y21_WMO_KOSTEN_max=MAX(Y21_WMO_KOSTEN)
+  /Y22_WMO_KOSTEN_max=MAX(Y22_WMO_KOSTEN)
+  /Y23_WMO_KOSTEN_max=MAX(Y23_WMO_KOSTEN).
+
+DELETE VARIABLES 
+Y19_WMO
+Y20_WMO
+Y21_WMO
+Y22_WMO
+Y23_WMO
+Y19_WMO_KOSTEN
+Y20_WMO_KOSTEN
+Y21_WMO_KOSTEN
+Y22_WMO_KOSTEN
+Y23_WMO_KOSTEN.
+EXECUTE. 
+
+
+RENAME VARIABLES 
+(Y19_WMO_max 
+Y20_WMO_max 
+Y21_WMO_max 
+Y22_WMO_max 
+Y23_WMO_max 
+Y19_WMO_KOSTEN_max
+Y20_WMO_KOSTEN_max
+Y21_WMO_KOSTEN_max
+Y22_WMO_KOSTEN_max
+Y23_WMO_KOSTEN_max= 
+Y19_WMO
+Y20_WMO
+Y21_WMO
+Y22_WMO
+Y23_WMO
+Y19_WMO_KOSTEN
+Y20_WMO_KOSTEN
+Y21_WMO_KOSTEN
+Y22_WMO_KOSTEN
+Y23_WMO_KOSTEN).
+EXECUTE.
+
+
+DATASET ACTIVATE WMO19_23.
+* Identify Duplicate Cases.
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+
+*Select one of  case for all duplicate cases and delete the others.
+FILTER OFF.
+USE ALL.
+SELECT IF (PrimaryLast=1).
+EXECUTE.
+
+DELETE VARIABLES
+PrimaryLast.
+EXECUTE.
+
+*** LAST STEP: koppelen van deze WMO dataset aan de grote dataset.
+
+GET
+FILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK_GGZ.sav".
+DATASET NAME BASIS.
+
+DATASET ACTIVATE BASIS.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WMO19_23.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS.
+MATCH FILES /FILE=*
+  /TABLE='WMO19_23'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME BASIS_WMO.
+
+RECODE Y19_WMO Y20_WMO Y21_WMO Y22_WMO Y23_WMO (1=1) (SYSMIS=0).
+VALUE LABELS Y19_WMO Y20_WMO Y21_WMO Y22_WMO Y23_WMO 0 'Nee' 1 'Ja'.
+EXECUTE.
+
+RECODE Y19_WMO_KOSTEN Y20_WMO_KOSTEN Y21_WMO_KOSTEN Y22_WMO_KOSTEN Y23_WMO_KOSTEN (SYSMIS=0) (ELSE=COPY).
+EXECUTE.
+
+SAVE OUTFILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK_GGZ_WMO.sav".
+
+
+*********************************** CBS MICRODATA WMO****************************************************
+*toch ook de cbs microdata toevoegen voor wmo om de arrangementen te kunnen bekijken (en uiteindelijk onderscheid te kunnen maken in hulpmiddelen, vervoer en ondersteuning). 
+*Nu gebeurt dit aan het einde en koppel ik het dus aan het eindbestand, bij een nieuwe upload deze syntax evt aanpassen zodat hij direct achter bovenstaande koppeling aan toegevoegd kan worden.
+*2019.
+GET FILE="G:\GezondheidWelzijn\WMOBUS\Wmo2019BUSV4.sav".
+DATASET NAME WMObus2019.
+
+DELETE VARIABLES vlgnrWmo 
+GEMWMOJJJJ
+FinancieringsvormWmo
+BegindatumWmo
+EinddatumWmo
+BegingeldigheidWmo
+EindgeldigheidWmo
+RedeneindeWmo
+ToestemmingWmo.
+EXECUTE.
+
+RENAME VARIABLES (TypeArrangementWmo
+ = Y19_TypeArrangementWmo).
+EXECUTE.
+
+* Alter type voor het omzetten van string naar numeric (f2).
+ALTER TYPE Y19_TypeArrangementWmo(f2).
+
+*omzetten van cases naar var.
+SORT CASES BY RINPERSOONS RINPERSOON .
+CASESTOVARS
+  /ID=RINPERSOONS RINPERSOON
+  /GROUPBY=INDEX.
+EXECUTE.
+
+SORT VARIABLES BY NAME (A).
+
+DATASET NAME WMO.
+
+** Voor deze stap checken hoeveel variabelen er aangemaakt zijn (heeft te maken met constant nieuwe aanvragen op arrangementen). Dit is te vinden in de output --> processing statistics --> index values: 14.  
+DATASET ACTIVATE WMO.
+
+COUNT Y19_TypeArrangementWmo_cat01 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (1).
+COUNT Y19_TypeArrangementWmo_cat02 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (2).
+COUNT Y19_TypeArrangementWmo_cat03 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (3).
+COUNT Y19_TypeArrangementWmo_cat04 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (4).
+COUNT Y19_TypeArrangementWmo_cat05 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (5).
+COUNT Y19_TypeArrangementWmo_cat06 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (6).
+COUNT Y19_TypeArrangementWmo_cat07 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (7).
+COUNT Y19_TypeArrangementWmo_cat08 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (8).
+COUNT Y19_TypeArrangementWmo_cat09 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (9).
+COUNT Y19_TypeArrangementWmo_cat10 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (10).
+COUNT Y19_TypeArrangementWmo_cat11 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (11).
+COUNT Y19_TypeArrangementWmo_cat12 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (12).
+COUNT Y19_TypeArrangementWmo_cat13 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (13).
+COUNT Y19_TypeArrangementWmo_cat14 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (14).
+COUNT Y19_TypeArrangementWmo_cat15 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (15).
+COUNT Y19_TypeArrangementWmo_cat16 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (16).
+COUNT Y19_TypeArrangementWmo_cat17 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (17).
+COUNT Y19_TypeArrangementWmo_cat18 = Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14 (18).
+EXECUTE.
+
+VARIABLE LABELS Y19_TypeArrangementWmo_cat01 'Hulp bij het huishouden'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat02 'Begeleiding'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat03 'Persoonlijke verzorging'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat04 'Kortdurend verblijf'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat05 'Woondiensten'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat06 'Overige ondersteuning gericht op het individu of huishouden/gezin'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat07 'Dagbesteding'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat08 'Vervoersdiensten'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat09 'Overige groepsgerichte ondersteuning'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat10 'Overige maatwerkarrangementen'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat11 'Rolstoelen'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat12 'Vervoersvoorzieningen'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat13 'Woonvoorzieningen'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat14 'Overige hulpmiddelen'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat15 'Beschermd wonen'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat16 'Opvang'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat17 'Spoedopvang'.
+VARIABLE LABELS Y19_TypeArrangementWmo_cat18 'Overige beschrermd wonen en opvang'.
+EXECUTE.
+
+
+DELETE VARIABLES Y19_TypeArrangementWmo.1 TO Y19_TypeArrangementWmo.14.
+EXECUTE.
+
+DATASET ACTIVATE BASIS_WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS_WMO.
+MATCH FILES /FILE=* 
+ /TABLE='WMO' 
+ /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET CLOSE WMO.
+
+*** Type arrangementen samenvoegen tot een aantal categorien (zodat de groepen niet te klein worden).
+*Categorie 1 = hulpmiddelen
+*Categorie 2 = Vervoer
+*categorie 3 = Ondersteuning
+*Categorie 4 = Opvang.
+
+RECODE Y19_TypeArrangementWmo_cat01 TO Y19_TypeArrangementWmo_cat18 (1 thru hi = 1) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y19_WMO_Hulpmiddelen = MAX (Y19_TypeArrangementWmo_cat11, Y19_TypeArrangementWmo_cat12, Y19_TypeArrangementWmo_cat13, Y19_TypeArrangementWmo_cat14).
+COMPUTE Y19_WMO_Vervoer = MAX (Y19_TypeArrangementWmo_cat08).
+COMPUTE Y19_WMO_Ondersteuning = MAX (Y19_TypeArrangementWmo_cat01, Y19_TypeArrangementWmo_cat02, Y19_TypeArrangementWmo_cat03, 
+Y19_TypeArrangementWmo_cat06, Y19_TypeArrangementWmo_cat07, Y19_TypeArrangementWmo_cat09, Y19_TypeArrangementWmo_cat10).
+COMPUTE Y19_WMO_Opvang = MAX (Y19_TypeArrangementWmo_cat04, Y19_TypeArrangementWmo_cat05, Y19_TypeArrangementWmo_cat15, 
+Y19_TypeArrangementWmo_cat16, Y19_TypeArrangementWmo_cat17, Y19_TypeArrangementWmo_cat18).
+EXECUTE.
+
+RECODE Y19_WMO_Hulpmiddelen, Y19_WMO_Vervoer, Y19_WMO_Ondersteuning, Y19_WMO_Opvang (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y19_WMO_totaal_CBS = MAX (Y19_WMO_Hulpmiddelen, Y19_WMO_Vervoer, Y19_WMO_Ondersteuning, Y19_WMO_Opvang). 
+EXECUTE.
+RECODE Y19_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y19_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+
+****** Check of er verschillen zitten tussen de datasets van de gemeente en CBS (waarschijnlijk minder mensen in gemeente dan CBS).
+*Evt. handmatig even checken of het inderdaad alleen mensen niet in gemeente staan die wel bij CBS als WMO gebruiker aangemerkt staan.
+*Indien ook mensen andersom ontbreken wordt het een lastig verhaal (zie uitleg Martin over de mail).
+USE ALL.
+COMPUTE filter_WMO=( Y19_WMO_totaal_CBS>= 1).
+VARIABLE LABELS filter_WMO 'Y19_WMO_totaal_CBS >= 1 (FILTER)'.
+VALUE LABELS filter_WMO 0 'Not Selected' 1 'Selected'.
+FORMATS filter_WMO (f1.0).
+FILTER BY filter_WMO.
+EXECUTE.
+
+FILTER OFF.
+EXECUTE.
+
+**Gemeente is leidend qua mensen die WMO daadwerkelijk ontvangen hebben, maar heb CBS nodig voor de arrangementen.
+** Combivariabele aanmaken waardoor de mensen die volgens de gemeente geen WMO hebben ontvangen er uit vallen.
+
+
+DO IF (Y19_WMO=0 AND Y19_WMO_Hulpmiddelen = 1).
+COMPUTE Y19_WMO_Hulpmiddelen = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y19_WMO=0 AND Y19_WMO_Vervoer = 1).
+COMPUTE Y19_WMO_Vervoer = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y19_WMO=0 AND Y19_WMO_Ondersteuning = 1).
+COMPUTE Y19_WMO_Ondersteuning = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y19_WMO=0 AND Y19_WMO_Opvang = 1).
+COMPUTE Y19_WMO_Opvang = 0.
+END IF.
+EXECUTE.
+
+COMPUTE Y19_WMO_totaal_CBS = MAX (Y19_WMO_Hulpmiddelen, Y19_WMO_Vervoer, Y19_WMO_Ondersteuning, Y19_WMO_Opvang). 
+EXECUTE.
+RECODE Y19_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y19_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+*2020.
+GET FILE="G:\GezondheidWelzijn\WMOBUS\Wmo2020BUSV5.sav".
+DATASET NAME WMObus2020.
+
+DELETE VARIABLES vlgnrWmo 
+GEMWMOJJJJ
+FinancieringsvormWmo
+BegindatumWmo
+EinddatumWmo
+BegingeldigheidWmo
+EindgeldigheidWmo
+RedeneindeWmo
+ToestemmingWmo.
+EXECUTE.
+
+RENAME VARIABLES (TypeArrangementWmo
+ = Y20_TypeArrangementWmo).
+EXECUTE.
+
+* Alter type voor het omzetten van string naar numeric (f2).
+ALTER TYPE Y20_TypeArrangementWmo(f2).
+
+*omzetten van cases naar var.
+SORT CASES BY RINPERSOONS RINPERSOON .
+CASESTOVARS
+  /ID=RINPERSOONS RINPERSOON
+  /GROUPBY=INDEX.
+EXECUTE.
+
+SORT VARIABLES BY NAME (A).
+
+DATASET NAME WMO.
+
+** Voor deze stap checken hoeveel variabelen er aangemaakt zijn (heeft te maken met constant nieuwe aanvragen op arrangementen). Dit is te vinden in de output --> processing statistics --> index values: 15.  
+DATASET ACTIVATE WMO.
+
+COUNT Y20_TypeArrangementWmo_cat01 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (1).
+COUNT Y20_TypeArrangementWmo_cat02 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (2).
+COUNT Y20_TypeArrangementWmo_cat03 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (3).
+COUNT Y20_TypeArrangementWmo_cat04 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (4).
+COUNT Y20_TypeArrangementWmo_cat05 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (5).
+COUNT Y20_TypeArrangementWmo_cat06 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (6).
+COUNT Y20_TypeArrangementWmo_cat07 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (7).
+COUNT Y20_TypeArrangementWmo_cat08 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (8).
+COUNT Y20_TypeArrangementWmo_cat09 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (9).
+COUNT Y20_TypeArrangementWmo_cat10 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (10).
+COUNT Y20_TypeArrangementWmo_cat11 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (11).
+COUNT Y20_TypeArrangementWmo_cat12 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (12).
+COUNT Y20_TypeArrangementWmo_cat13 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (13).
+COUNT Y20_TypeArrangementWmo_cat14 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (14).
+COUNT Y20_TypeArrangementWmo_cat15 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (15).
+COUNT Y20_TypeArrangementWmo_cat16 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (16).
+COUNT Y20_TypeArrangementWmo_cat17 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (17).
+COUNT Y20_TypeArrangementWmo_cat18 = Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15 (18).
+EXECUTE.
+
+VARIABLE LABELS Y20_TypeArrangementWmo_cat01 'Hulp bij het huishouden'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat02 'Begeleiding'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat03 'Persoonlijke verzorging'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat04 'Kortdurend verblijf'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat05 'Woondiensten'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat06 'Overige ondersteuning gericht op het individu of huishouden/gezin'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat07 'Dagbesteding'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat08 'Vervoersdiensten'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat09 'Overige groepsgerichte ondersteuning'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat10 'Overige maatwerkarrangementen'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat11 'Rolstoelen'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat12 'Vervoersvoorzieningen'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat13 'Woonvoorzieningen'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat14 'Overige hulpmiddelen'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat15 'Beschermd wonen'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat16 'Opvang'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat17 'Spoedopvang'.
+VARIABLE LABELS Y20_TypeArrangementWmo_cat18 'Overige beschrermd wonen en opvang'.
+EXECUTE.
+
+
+DELETE VARIABLES Y20_TypeArrangementWmo.1 TO Y20_TypeArrangementWmo.15.
+EXECUTE.
+
+
+DATASET ACTIVATE BASIS_WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS_WMO.
+MATCH FILES /FILE=* 
+ /TABLE='WMO' 
+ /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET CLOSE WMO.
+
+
+*** Type arrangementen samenvoegen tot een aantal categorien (zodat de groepen niet te klein worden).
+*Categorie 1 = hulpmiddelen
+*Categorie 2 = Vervoer
+*categorie 3 = Ondersteuning
+*Categorie 4 = Opvang.
+
+RECODE Y20_TypeArrangementWmo_cat01 TO Y20_TypeArrangementWmo_cat18 (1 thru hi = 1) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y20_WMO_Hulpmiddelen = MAX (Y20_TypeArrangementWmo_cat11, Y20_TypeArrangementWmo_cat12, Y20_TypeArrangementWmo_cat13, Y20_TypeArrangementWmo_cat14).
+COMPUTE Y20_WMO_Vervoer = MAX (Y20_TypeArrangementWmo_cat08).
+COMPUTE Y20_WMO_Ondersteuning = MAX (Y20_TypeArrangementWmo_cat01, Y20_TypeArrangementWmo_cat02, Y20_TypeArrangementWmo_cat03, 
+Y20_TypeArrangementWmo_cat06, Y20_TypeArrangementWmo_cat07, Y20_TypeArrangementWmo_cat09, Y20_TypeArrangementWmo_cat10).
+COMPUTE Y20_WMO_Opvang = MAX (Y20_TypeArrangementWmo_cat04, Y20_TypeArrangementWmo_cat05, Y20_TypeArrangementWmo_cat15, 
+Y20_TypeArrangementWmo_cat16, Y20_TypeArrangementWmo_cat17, Y20_TypeArrangementWmo_cat18).
+EXECUTE.
+
+RECODE Y20_WMO_Hulpmiddelen, Y20_WMO_Vervoer, Y20_WMO_Ondersteuning, Y20_WMO_Opvang (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y20_WMO_totaal_CBS = MAX (Y20_WMO_Hulpmiddelen, Y20_WMO_Vervoer, Y20_WMO_Ondersteuning, Y20_WMO_Opvang). 
+EXECUTE.
+RECODE Y20_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y20_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+
+****** Check of er verschillen zitten tussen de datasets van de gemeente en CBS (waarschijnlijk minder mensen in gemeente dan CBS).
+*Evt. handmatig even checken of het inderdaad alleen mensen niet in gemeente staan die wel bij CBS als WMO gebruiker aangemerkt staan.
+*Indien ook mensen andersom ontbreken wordt het een lastig verhaal (zie uitleg Martin over de mail).
+USE ALL.
+COMPUTE filter_WMO=( Y20_WMO_totaal_CBS>= 1).
+VARIABLE LABELS filter_WMO 'Y20_WMO_totaal_CBS >= 1 (FILTER)'.
+VALUE LABELS filter_WMO 0 'Not Selected' 1 'Selected'.
+FORMATS filter_WMO (f1.0).
+FILTER BY filter_WMO.
+EXECUTE.
+
+FILTER OFF.
+EXECUTE.
+
+**Gemeente is leidend qua mensen die WMO daadwerkelijk ontvangen hebben, maar heb CBS nodig voor de arrangementen.
+** Combivariabele aanmaken waardoor de mensen die volgens de gemeente geen WMO hebben ontvangen er uit vallen.
+
+
+DO IF (Y20_WMO=0 AND Y20_WMO_Hulpmiddelen = 1).
+COMPUTE Y20_WMO_Hulpmiddelen = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y20_WMO=0 AND Y20_WMO_Vervoer = 1).
+COMPUTE Y20_WMO_Vervoer = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y20_WMO=0 AND Y20_WMO_Ondersteuning = 1).
+COMPUTE Y20_WMO_Ondersteuning = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y20_WMO=0 AND Y20_WMO_Opvang = 1).
+COMPUTE Y20_WMO_Opvang = 0.
+END IF.
+EXECUTE.
+
+COMPUTE Y20_WMO_totaal_CBS = MAX (Y20_WMO_Hulpmiddelen, Y20_WMO_Vervoer, Y20_WMO_Ondersteuning, Y20_WMO_Opvang). 
+EXECUTE.
+RECODE Y20_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y20_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+
+*2021.
+GET FILE="G:\GezondheidWelzijn\WMOBUS\Wmo2021BUSV5.sav".
+DATASET NAME WMObus2021.
+
+DELETE VARIABLES vlgnrWmo 
+GEMWMOJJJJ
+FinancieringsvormWmo
+BegindatumWmo
+EinddatumWmo
+BegingeldigheidWmo
+EindgeldigheidWmo
+RedeneindeWmo
+ToestemmingWmo.
+EXECUTE.
+
+RENAME VARIABLES (TypeArrangementWmo
+ = Y21_TypeArrangementWmo).
+EXECUTE.
+
+* Alter type voor het omzetten van string naar numeric (f2).
+ALTER TYPE Y21_TypeArrangementWmo(f2).
+
+*omzetten van cases naar var.
+SORT CASES BY RINPERSOONS RINPERSOON .
+CASESTOVARS
+  /ID=RINPERSOONS RINPERSOON
+  /GROUPBY=INDEX.
+EXECUTE.
+
+SORT VARIABLES BY NAME (A).
+
+DATASET NAME WMO.
+
+** Voor deze stap checken hoeveel variabelen er aangemaakt zijn (heeft te maken met constant nieuwe aanvragen op arrangementen). Dit is te vinden in de output --> processing statistics --> index values: 13.  
+DATASET ACTIVATE WMO.
+
+COUNT Y21_TypeArrangementWmo_cat01 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (1).
+COUNT Y21_TypeArrangementWmo_cat02 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (2).
+COUNT Y21_TypeArrangementWmo_cat03 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (3).
+COUNT Y21_TypeArrangementWmo_cat04 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (4).
+COUNT Y21_TypeArrangementWmo_cat05 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (5).
+COUNT Y21_TypeArrangementWmo_cat06 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (6).
+COUNT Y21_TypeArrangementWmo_cat07 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (7).
+COUNT Y21_TypeArrangementWmo_cat08 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (8).
+COUNT Y21_TypeArrangementWmo_cat09 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (9).
+COUNT Y21_TypeArrangementWmo_cat10 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (10).
+COUNT Y21_TypeArrangementWmo_cat11 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (11).
+COUNT Y21_TypeArrangementWmo_cat12 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (12).
+COUNT Y21_TypeArrangementWmo_cat13 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (13).
+COUNT Y21_TypeArrangementWmo_cat14 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (14).
+COUNT Y21_TypeArrangementWmo_cat15 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (15).
+COUNT Y21_TypeArrangementWmo_cat16 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (16).
+COUNT Y21_TypeArrangementWmo_cat17 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (17).
+COUNT Y21_TypeArrangementWmo_cat18 = Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13 (18).
+EXECUTE.
+
+VARIABLE LABELS Y21_TypeArrangementWmo_cat01 'Hulp bij het huishouden'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat02 'Begeleiding'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat03 'Persoonlijke verzorging'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat04 'Kortdurend verblijf'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat05 'Woondiensten'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat06 'Overige ondersteuning gericht op het individu of huishouden/gezin'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat07 'Dagbesteding'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat08 'Vervoersdiensten'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat09 'Overige groepsgerichte ondersteuning'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat10 'Overige maatwerkarrangementen'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat11 'Rolstoelen'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat12 'Vervoersvoorzieningen'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat13 'Woonvoorzieningen'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat14 'Overige hulpmiddelen'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat15 'Beschermd wonen'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat16 'Opvang'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat17 'Spoedopvang'.
+VARIABLE LABELS Y21_TypeArrangementWmo_cat18 'Overige beschrermd wonen en opvang'.
+EXECUTE.
+
+
+DELETE VARIABLES Y21_TypeArrangementWmo.1 TO Y21_TypeArrangementWmo.13.
+EXECUTE.
+
+
+DATASET ACTIVATE BASIS_WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS_WMO.
+MATCH FILES /FILE=* 
+ /TABLE='WMO' 
+ /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET CLOSE WMO.
+
+
+*** Type arrangementen samenvoegen tot een aantal categorien (zodat de groepen niet te klein worden).
+*Categorie 1 = hulpmiddelen
+*Categorie 2 = Vervoer
+*categorie 3 = Ondersteuning
+*Categorie 4 = Opvang.
+
+RECODE Y21_TypeArrangementWmo_cat01 TO Y21_TypeArrangementWmo_cat18 (1 thru hi = 1) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y21_WMO_Hulpmiddelen = MAX (Y21_TypeArrangementWmo_cat11, Y21_TypeArrangementWmo_cat12, Y21_TypeArrangementWmo_cat13, Y21_TypeArrangementWmo_cat14).
+COMPUTE Y21_WMO_Vervoer = MAX (Y21_TypeArrangementWmo_cat08).
+COMPUTE Y21_WMO_Ondersteuning = MAX (Y21_TypeArrangementWmo_cat01, Y21_TypeArrangementWmo_cat02, Y21_TypeArrangementWmo_cat03, 
+Y21_TypeArrangementWmo_cat06, Y21_TypeArrangementWmo_cat07, Y21_TypeArrangementWmo_cat09, Y21_TypeArrangementWmo_cat10).
+COMPUTE Y21_WMO_Opvang = MAX (Y21_TypeArrangementWmo_cat04, Y21_TypeArrangementWmo_cat05, Y21_TypeArrangementWmo_cat15, 
+Y21_TypeArrangementWmo_cat16, Y21_TypeArrangementWmo_cat17, Y21_TypeArrangementWmo_cat18).
+EXECUTE.
+
+RECODE Y21_WMO_Hulpmiddelen, Y21_WMO_Vervoer, Y21_WMO_Ondersteuning, Y21_WMO_Opvang (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y21_WMO_totaal_CBS = MAX (Y21_WMO_Hulpmiddelen, Y21_WMO_Vervoer, Y21_WMO_Ondersteuning, Y21_WMO_Opvang). 
+EXECUTE.
+RECODE Y21_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y21_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+
+****** Check of er verschillen zitten tussen de datasets van de gemeente en CBS (waarschijnlijk minder mensen in gemeente dan CBS).
+*Evt. handmatig even checken of het inderdaad alleen mensen niet in gemeente staan die wel bij CBS als WMO gebruiker aangemerkt staan.
+*Indien ook mensen andersom ontbreken wordt het een lastig verhaal (zie uitleg Martin over de mail).
+USE ALL.
+COMPUTE filter_WMO=( Y21_WMO_totaal_CBS>= 1).
+VARIABLE LABELS filter_WMO 'Y21_WMO_totaal_CBS >= 1 (FILTER)'.
+VALUE LABELS filter_WMO 0 'Not Selected' 1 'Selected'.
+FORMATS filter_WMO (f1.0).
+FILTER BY filter_WMO.
+EXECUTE.
+
+FILTER OFF.
+EXECUTE.
+
+**Gemeente is leidend qua mensen die WMO daadwerkelijk ontvangen hebben, maar heb CBS nodig voor de arrangementen.
+** Combivariabele aanmaken waardoor de mensen die volgens de gemeente geen WMO hebben ontvangen er uit vallen.
+
+
+DO IF (Y21_WMO=0 AND Y21_WMO_Hulpmiddelen = 1).
+COMPUTE Y21_WMO_Hulpmiddelen = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y21_WMO=0 AND Y21_WMO_Vervoer = 1).
+COMPUTE Y21_WMO_Vervoer = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y21_WMO=0 AND Y21_WMO_Ondersteuning = 1).
+COMPUTE Y21_WMO_Ondersteuning = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y21_WMO=0 AND Y21_WMO_Opvang = 1).
+COMPUTE Y21_WMO_Opvang = 0.
+END IF.
+EXECUTE.
+
+COMPUTE Y21_WMO_totaal_CBS = MAX (Y21_WMO_Hulpmiddelen, Y21_WMO_Vervoer, Y21_WMO_Ondersteuning, Y21_WMO_Opvang). 
+EXECUTE.
+RECODE Y21_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y21_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+*2022.
+GET FILE="G:\GezondheidWelzijn\WMOBUS\Wmo2022BUSV5.sav".
+DATASET NAME WMObus2022.
+
+DELETE VARIABLES vlgnrWmo 
+GEMWMOJJJJ
+FinancieringsvormWmo
+BegindatumWmo
+EinddatumWmo
+BegingeldigheidWmo
+EindgeldigheidWmo
+RedeneindeWmo
+ToestemmingWmo.
+EXECUTE.
+
+RENAME VARIABLES (TypeArrangementWmo
+ = Y22_TypeArrangementWmo).
+EXECUTE.
+
+* Alter type voor het omzetten van string naar numeric (f2).
+ALTER TYPE Y22_TypeArrangementWmo(f2).
+
+*omzetten van cases naar var.
+SORT CASES BY RINPERSOONS RINPERSOON .
+CASESTOVARS
+  /ID=RINPERSOONS RINPERSOON
+  /GROUPBY=INDEX.
+EXECUTE.
+
+SORT VARIABLES BY NAME (A).
+
+DATASET NAME WMO.
+
+** Voor deze stap checken hoeveel variabelen er aangemaakt zijn (heeft te maken met constant nieuwe aanvragen op arrangementen). Dit is te vinden in de output --> processing statistics --> index values: 506.  
+DATASET ACTIVATE WMO.
+
+COUNT Y22_TypeArrangementWmo_cat01 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (1).
+COUNT Y22_TypeArrangementWmo_cat02 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (2).
+COUNT Y22_TypeArrangementWmo_cat03 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (3).
+COUNT Y22_TypeArrangementWmo_cat04 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (4).
+COUNT Y22_TypeArrangementWmo_cat05 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (5).
+COUNT Y22_TypeArrangementWmo_cat06 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (6).
+COUNT Y22_TypeArrangementWmo_cat07 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (7).
+COUNT Y22_TypeArrangementWmo_cat08 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (8).
+COUNT Y22_TypeArrangementWmo_cat09 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (9).
+COUNT Y22_TypeArrangementWmo_cat10 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (10).
+COUNT Y22_TypeArrangementWmo_cat11 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (11).
+COUNT Y22_TypeArrangementWmo_cat12 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (12).
+COUNT Y22_TypeArrangementWmo_cat13 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (13).
+COUNT Y22_TypeArrangementWmo_cat14 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (14).
+COUNT Y22_TypeArrangementWmo_cat15 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (15).
+COUNT Y22_TypeArrangementWmo_cat16 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (16).
+COUNT Y22_TypeArrangementWmo_cat17 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (17).
+COUNT Y22_TypeArrangementWmo_cat18 = Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14 (18).
+EXECUTE.
+
+VARIABLE LABELS Y22_TypeArrangementWmo_cat01 'Hulp bij het huishouden'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat02 'Begeleiding'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat03 'Persoonlijke verzorging'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat04 'Kortdurend verblijf'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat05 'Woondiensten'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat06 'Overige ondersteuning gericht op het individu of huishouden/gezin'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat07 'Dagbesteding'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat08 'Vervoersdiensten'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat09 'Overige groepsgerichte ondersteuning'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat10 'Overige maatwerkarrangementen'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat11 'Rolstoelen'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat12 'Vervoersvoorzieningen'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat13 'Woonvoorzieningen'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat14 'Overige hulpmiddelen'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat15 'Beschermd wonen'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat16 'Opvang'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat17 'Spoedopvang'.
+VARIABLE LABELS Y22_TypeArrangementWmo_cat18 'Overige beschrermd wonen en opvang'.
+EXECUTE.
+
+DELETE VARIABLES Y22_TypeArrangementWmo.1 TO Y22_TypeArrangementWmo.14.
+EXECUTE.
+
+DATASET ACTIVATE BASIS_WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS_WMO.
+MATCH FILES /FILE=* 
+ /TABLE='WMO' 
+ /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET CLOSE WMO.
+
+
+*** Type arrangementen samenvoegen tot een aantal categorien (zodat de groepen niet te klein worden).
+*Categorie 1 = hulpmiddelen
+*Categorie 2 = Vervoer
+*categorie 3 = Ondersteuning
+*Categorie 4 = Opvang.
+
+RECODE Y22_TypeArrangementWmo_cat01 TO Y22_TypeArrangementWmo_cat18 (1 thru hi = 1) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y22_WMO_Hulpmiddelen = MAX (Y22_TypeArrangementWmo_cat11, Y22_TypeArrangementWmo_cat12, Y22_TypeArrangementWmo_cat13, Y22_TypeArrangementWmo_cat14).
+COMPUTE Y22_WMO_Vervoer = MAX (Y22_TypeArrangementWmo_cat08).
+COMPUTE Y22_WMO_Ondersteuning = MAX (Y22_TypeArrangementWmo_cat01, Y22_TypeArrangementWmo_cat02, Y22_TypeArrangementWmo_cat03, 
+Y22_TypeArrangementWmo_cat06, Y22_TypeArrangementWmo_cat07, Y22_TypeArrangementWmo_cat09, Y22_TypeArrangementWmo_cat10).
+COMPUTE Y22_WMO_Opvang = MAX (Y22_TypeArrangementWmo_cat04, Y22_TypeArrangementWmo_cat05, Y22_TypeArrangementWmo_cat15, 
+Y22_TypeArrangementWmo_cat16, Y22_TypeArrangementWmo_cat17, Y22_TypeArrangementWmo_cat18).
+EXECUTE.
+
+RECODE Y22_WMO_Hulpmiddelen, Y22_WMO_Vervoer, Y22_WMO_Ondersteuning, Y22_WMO_Opvang (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y22_WMO_totaal_CBS = MAX (Y22_WMO_Hulpmiddelen, Y22_WMO_Vervoer, Y22_WMO_Ondersteuning, Y22_WMO_Opvang). 
+EXECUTE.
+RECODE Y22_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y22_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+
+****** Check of er verschillen zitten tussen de datasets van de gemeente en CBS (waarschijnlijk minder mensen in gemeente dan CBS).
+*Evt. handmatig even checken of het inderdaad alleen mensen niet in gemeente staan die wel bij CBS als WMO gebruiker aangemerkt staan.
+*Indien ook mensen andersom ontbreken wordt het een lastig verhaal (zie uitleg Martin over de mail).
+USE ALL.
+COMPUTE filter_WMO=( Y22_WMO_totaal_CBS>= 1).
+VARIABLE LABELS filter_WMO 'Y22_WMO_totaal_CBS >= 1 (FILTER)'.
+VALUE LABELS filter_WMO 0 'Not Selected' 1 'Selected'.
+FORMATS filter_WMO (f1.0).
+FILTER BY filter_WMO.
+EXECUTE.
+
+FILTER OFF.
+EXECUTE.
+
+**Gemeente is leidend qua mensen die WMO daadwerkelijk ontvangen hebben, maar heb CBS nodig voor de arrangementen.
+** Combivariabele aanmaken waardoor de mensen die volgens de gemeente geen WMO hebben ontvangen er uit vallen.
+
+
+DO IF (Y22_WMO=0 AND Y22_WMO_Hulpmiddelen = 1).
+COMPUTE Y22_WMO_Hulpmiddelen = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y22_WMO=0 AND Y22_WMO_Vervoer = 1).
+COMPUTE Y22_WMO_Vervoer = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y22_WMO=0 AND Y22_WMO_Ondersteuning = 1).
+COMPUTE Y22_WMO_Ondersteuning = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y22_WMO=0 AND Y22_WMO_Opvang = 1).
+COMPUTE Y22_WMO_Opvang = 0.
+END IF.
+EXECUTE.
+
+COMPUTE Y22_WMO_totaal_CBS = MAX (Y22_WMO_Hulpmiddelen, Y22_WMO_Vervoer, Y22_WMO_Ondersteuning, Y22_WMO_Opvang). 
+EXECUTE.
+RECODE Y22_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y22_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+*2023.
+GET FILE="G:\GezondheidWelzijn\WMOBUS\Wmo2023BUSV3.sav".
+DATASET NAME WMObus2023.
+
+DELETE VARIABLES vlgnrWmo 
+GEMWMOJJJJ
+FinancieringsvormWmo
+BegindatumWmo
+EinddatumWmo
+BegingeldigheidWmo
+EindgeldigheidWmo
+RedeneindeWmo
+ToestemmingWmo.
+EXECUTE.
+
+RENAME VARIABLES (TypeArrangementWmo
+ = Y23_TypeArrangementWmo).
+EXECUTE.
+
+* Alter type voor het omzetten van string naar numeric (f2).
+ALTER TYPE Y23_TypeArrangementWmo(f2).
+
+*omzetten van cases naar var.
+SORT CASES BY RINPERSOONS RINPERSOON .
+CASESTOVARS
+  /ID=RINPERSOONS RINPERSOON
+  /GROUPBY=INDEX.
+EXECUTE.
+
+SORT VARIABLES BY NAME (A).
+
+DATASET NAME WMO.
+
+** Voor deze stap checken hoeveel variabelen er aangemaakt zijn (heeft te maken met constant nieuwe aanvragen op arrangementen). Dit is te vinden in de output --> processing statistics --> index values: 15.  
+DATASET ACTIVATE WMO.
+
+COUNT Y23_TypeArrangementWmo_cat01 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (1).
+COUNT Y23_TypeArrangementWmo_cat02 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (2).
+COUNT Y23_TypeArrangementWmo_cat03 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (3).
+COUNT Y23_TypeArrangementWmo_cat04 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (4).
+COUNT Y23_TypeArrangementWmo_cat05 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (5).
+COUNT Y23_TypeArrangementWmo_cat06 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (6).
+COUNT Y23_TypeArrangementWmo_cat07 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (7).
+COUNT Y23_TypeArrangementWmo_cat08 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (8).
+COUNT Y23_TypeArrangementWmo_cat09 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (9).
+COUNT Y23_TypeArrangementWmo_cat10 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (10).
+COUNT Y23_TypeArrangementWmo_cat11 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (11).
+COUNT Y23_TypeArrangementWmo_cat12 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (12).
+COUNT Y23_TypeArrangementWmo_cat13 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (13).
+COUNT Y23_TypeArrangementWmo_cat14 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (14).
+COUNT Y23_TypeArrangementWmo_cat15 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (15).
+COUNT Y23_TypeArrangementWmo_cat16 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (16).
+COUNT Y23_TypeArrangementWmo_cat17 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (17).
+COUNT Y23_TypeArrangementWmo_cat18 = Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15 (18).
+EXECUTE.
+
+VARIABLE LABELS Y23_TypeArrangementWmo_cat01 'Hulp bij het huishouden'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat02 'Begeleiding'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat03 'Persoonlijke verzorging'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat04 'Kortdurend verblijf'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat05 'Woondiensten'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat06 'Overige ondersteuning gericht op het individu of huishouden/gezin'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat07 'Dagbesteding'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat08 'Vervoersdiensten'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat09 'Overige groepsgerichte ondersteuning'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat10 'Overige maatwerkarrangementen'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat11 'Rolstoelen'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat12 'Vervoersvoorzieningen'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat13 'Woonvoorzieningen'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat14 'Overige hulpmiddelen'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat15 'Beschermd wonen'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat16 'Opvang'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat17 'Spoedopvang'.
+VARIABLE LABELS Y23_TypeArrangementWmo_cat18 'Overige beschrermd wonen en opvang'.
+EXECUTE.
+
+
+DELETE VARIABLES Y23_TypeArrangementWmo.1 TO Y23_TypeArrangementWmo.15.
+EXECUTE.
+
+
+DATASET ACTIVATE BASIS_WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WMO.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS_WMO.
+MATCH FILES /FILE=* 
+ /TABLE='WMO' 
+ /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET CLOSE WMO.
+
+
+*** Type arrangementen samenvoegen tot een aantal categorien (zodat de groepen niet te klein worden).
+*Categorie 1 = hulpmiddelen
+*Categorie 2 = Vervoer
+*categorie 3 = Ondersteuning
+*Categorie 4 = Opvang.
+
+RECODE Y23_TypeArrangementWmo_cat01 TO Y23_TypeArrangementWmo_cat18 (1 thru hi = 1) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y23_WMO_Hulpmiddelen = MAX (Y23_TypeArrangementWmo_cat11, Y23_TypeArrangementWmo_cat12, Y23_TypeArrangementWmo_cat13, Y23_TypeArrangementWmo_cat14).
+COMPUTE Y23_WMO_Vervoer = MAX (Y23_TypeArrangementWmo_cat08).
+COMPUTE Y23_WMO_Ondersteuning = MAX (Y23_TypeArrangementWmo_cat01, Y23_TypeArrangementWmo_cat02, Y23_TypeArrangementWmo_cat03, 
+Y23_TypeArrangementWmo_cat06, Y23_TypeArrangementWmo_cat07, Y23_TypeArrangementWmo_cat09, Y23_TypeArrangementWmo_cat10).
+COMPUTE Y23_WMO_Opvang = MAX (Y23_TypeArrangementWmo_cat04, Y23_TypeArrangementWmo_cat05, Y23_TypeArrangementWmo_cat15, 
+Y23_TypeArrangementWmo_cat16, Y23_TypeArrangementWmo_cat17, Y23_TypeArrangementWmo_cat18).
+EXECUTE.
+
+RECODE Y23_WMO_Hulpmiddelen, Y23_WMO_Vervoer, Y23_WMO_Ondersteuning, Y23_WMO_Opvang (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+
+COMPUTE Y23_WMO_totaal_CBS = MAX (Y23_WMO_Hulpmiddelen, Y23_WMO_Vervoer, Y23_WMO_Ondersteuning, Y23_WMO_Opvang). 
+EXECUTE.
+RECODE Y23_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y23_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+****** Check of er verschillen zitten tussen de datasets van de gemeente en CBS (waarschijnlijk minder mensen in gemeente dan CBS).
+*Evt. handmatig even checken of het inderdaad alleen mensen niet in gemeente staan die wel bij CBS als WMO gebruiker aangemerkt staan.
+*Indien ook mensen andersom ontbreken wordt het een lastig verhaal (zie uitleg Martin over de mail).
+USE ALL.
+COMPUTE filter_WMO=( Y23_WMO_totaal_CBS>= 1).
+VARIABLE LABELS filter_WMO 'Y23_WMO_totaal_CBS >= 1 (FILTER)'.
+VALUE LABELS filter_WMO 0 'Not Selected' 1 'Selected'.
+FORMATS filter_WMO (f1.0).
+FILTER BY filter_WMO.
+EXECUTE.
+
+FILTER OFF.
+EXECUTE.
+
+**Gemeente is leidend qua mensen die WMO daadwerkelijk ontvangen hebben, maar heb CBS nodig voor de arrangementen.
+** Combivariabele aanmaken waardoor de mensen die volgens de gemeente geen WMO hebben ontvangen er uit vallen.
+DO IF (Y23_WMO=0 AND Y23_WMO_Hulpmiddelen = 1).
+COMPUTE Y23_WMO_Hulpmiddelen = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y23_WMO=0 AND Y23_WMO_Vervoer = 1).
+COMPUTE Y23_WMO_Vervoer = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y23_WMO=0 AND Y23_WMO_Ondersteuning = 1).
+COMPUTE Y23_WMO_Ondersteuning = 0.
+END IF.
+EXECUTE.
+
+DO IF (Y23_WMO=0 AND Y23_WMO_Opvang = 1).
+COMPUTE Y23_WMO_Opvang = 0.
+END IF.
+EXECUTE.
+
+COMPUTE Y23_WMO_totaal_CBS = MAX (Y23_WMO_Hulpmiddelen, Y23_WMO_Vervoer, Y23_WMO_Ondersteuning, Y23_WMO_Opvang). 
+EXECUTE.
+RECODE Y23_WMO_totaal_CBS (SYSMIS = 0) (ELSE = COPY).
+EXECUTE.
+VALUE LABELS Y23_WMO_totaal_CBS  0 'Nee' 1 'Ja'.
+EXECUTE.
+
+
+SAVE OUTFILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK_GGZ_WMO.sav".
+
+*****************************************************************MEDICATIE GEBRUIK********************************************************
+*Polyfarmacie (proxy)
+
+* Stap 1. per jaar; alle dermatoligische geneesmiddelen verwijderen (beginnen met een D).
+* Stap 2. per jaar; aggregate (?).
+* Stap 3. aan mijn dataset koppelen zodat de groep kleiner wordt, daarna bewerken.
+* Stap 4. per jaar; aantal verschillende soorten medicatie tellen (ATC-4 nivevau)
+--> Check om wat voor soort medicatie het allemaal gaat, voor chronische ziektes of ernstige aandoeningen bijv?
+* Stap 5. per jaar; uniek maken (polyfarmacy ja/nee)
+* Stap 6.  alle jaren koppelen
+
+**2019.
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2019\MEDICIJN2019TABV1.sav".
+DATASET NAME MED19.
+
+AUTORECODE ATC4/ INTO nATC4.
+EXECUTE.
+
+*DELETE CASES; If ATC4 starts with D (dermatoligic medicines).
+
+SELECT IF (nATC4 <71 OR nATC4>88).
+EXECUTE.
+
+**AGGREGATE.
+DATASET ACTIVATE MED19.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  /Y19_N_MED=N.
+
+
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast = 1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+** variabele voor polyfarmacie aanmaken.
+COMPUTE Y19_Polyfarmacie = 0.
+If (Y19_N_MED >=5) Y19_Polyfarmacie = 1.
+ADD VALUE LABELS Y19_Polyfarmacie 0 'Nee' 1 'Ja'.
+
+DATASET NAME MED19.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\MED19.sav".
+
+**2020.
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2020\MEDICIJN2020TABV2.sav".
+DATASET NAME MED20.
+
+AUTORECODE ATC4/ INTO nATC4.
+EXECUTE.
+
+*DELETE CASES; If ATC4 starts with D (dermatoligic medicines).
+
+SELECT IF (nATC4 <71 OR nATC4>88).
+EXECUTE.
+
+**AGGREGATE.
+DATASET ACTIVATE MED20.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  /Y20_N_MED=N.
+
+
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast = 1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+** variabele voor polyfarmacie aanmaken.
+COMPUTE Y20_Polyfarmacie = 0.
+If (Y20_N_MED >=5) Y20_Polyfarmacie = 1.
+ADD VALUE LABELS Y20_Polyfarmacie 0 'Nee' 1 'Ja'.
+
+**samenvoegen van de verschillende jaren.
+DATASET ACTIVATE MED20.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19.
+MATCH FILES /FILE=*
+/TABLE='MED20'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME MED19_20.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\MED19_20.sav".
+DATASET CLOSE MED20.
+
+**2021.
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2021\MEDICIJN2021TABV1.sav".
+DATASET NAME MED21.
+
+AUTORECODE ATC4/ INTO nATC4.
+EXECUTE.
+
+*DELETE CASES; If ATC4 starts with D (dermatoligic medicines).
+
+SELECT IF (nATC4 <71 OR nATC4>88).
+EXECUTE.
+
+**AGGREGATE.
+DATASET ACTIVATE MED21.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  / Y21_N_MED=N.
+
+
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast = 1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+** variabele voor polyfarmacie aanmaken.
+COMPUTE Y21_Polyfarmacie = 0.
+If (Y21_N_MED >=5) Y21_Polyfarmacie = 1.
+ADD VALUE LABELS Y21_Polyfarmacie 0 'Nee' 1 'Ja'.
+
+**samenvoegen van de verschillende jaren.
+DATASET ACTIVATE MED21.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19_20.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19_20.
+MATCH FILES /FILE=*
+/TABLE='MED21'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME MED19_21.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\MED19_21.sav".
+DATASET CLOSE MED21.
+
+**2022.
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2022\MEDICIJN2022TABV1.sav".
+DATASET NAME MED22.
+
+AUTORECODE ATC4/ INTO nATC4.
+EXECUTE.
+
+*DELETE CASES; If ATC4 starts with D (dermatoligic medicines).
+
+SELECT IF (nATC4 <71 OR nATC4>88).
+EXECUTE.
+
+**AGGREGATE.
+DATASET ACTIVATE MED22.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  / Y22_N_MED=N.
+
+
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast = 1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+** variabele voor polyfarmacie aanmaken.
+COMPUTE Y22_Polyfarmacie = 0.
+If (Y22_N_MED >=5) Y22_Polyfarmacie = 1.
+ADD VALUE LABELS Y22_Polyfarmacie 0 'Nee' 1 'Ja'.
+
+**samenvoegen van de verschillende jaren.
+DATASET ACTIVATE MED22.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19_21.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19_21.
+MATCH FILES /FILE=*
+/TABLE='MED22'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME MED19_22.
+DATASET CLOSE MED22.
+
+
+*2023.
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2023\MEDICIJN2023TABV1.sav".
+DATASET NAME MED23.
+
+AUTORECODE ATC4/ INTO nATC4.
+EXECUTE.
+
+*DELETE CASES; If ATC4 starts with D (dermatoligic medicines).
+
+SELECT IF (nATC4 <71 OR nATC4>88).
+EXECUTE.
+
+**AGGREGATE.
+DATASET ACTIVATE MED23.
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  / Y23_N_MED=N.
+
+
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast = 1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+** variabele voor polyfarmacie aanmaken.
+COMPUTE Y23_Polyfarmacie = 0.
+If (Y23_N_MED >=5) Y23_Polyfarmacie = 1.
+ADD VALUE LABELS Y23_Polyfarmacie 0 'Nee' 1 'Ja'.
+
+**samenvoegen van de verschillende jaren.
+DATASET ACTIVATE MED23.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19_22.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19_22.
+MATCH FILES /FILE=*
+/TABLE='MED23'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME MED19_23.
+DATASET CLOSE MED23.
+
+DATASET ACTIVATE MED19_23.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\MED19_23.sav".
+
+
+
+DELETE VARIABLES ATC4
+nATC4
+DDD.
+EXECUTE.
+
+***DATASET POLYFARMACIE KOPPELEN AAN GEHEEL.
+
+GET FILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK_GGZ_WMO.sav".
+DATASET NAME BASIS.
+DATASET ACTIVATE BASIS.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19_23.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE BASIS.
+MATCH FILES /FILE=*
+/TABLE='MED19_23'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK_GGZ_WMO_POLYF.sav".
+
+
+*******************************************************Toch ook geintereseerd in het soort medicatie, daarom nog onderstaande bewerkingen******************************
+*NOTE onderstaande stappen kunnen waarschijnlijk gemerged worden met bovenstaande stappen, maar onderstaande is pas later bedacht dat het nodig is. Nog naar kijken om samen te voegen.
+
+GET FILE "H:\Datavoorbereiding\NWA\Roos\WOR_WELZIJN\WoR_cases1.sav".
+DATASET NAME WoR.
+
+
+DATASET ACTIVATE WoR.
+* Identify Duplicate Cases.
+SORT CASES BY RINPersoon(A) RINPERSOONS(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPersoon RINPERSOONS
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast=1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+*Cases van WoR koppelen aan de medicijntab.
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2019\MEDICIJN2019TABV1.sav".
+DATASET NAME MED19.
+
+
+DATASET ACTIVATE MED19.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19.
+MATCH FILES /FILE=MED19
+/TABLE='WoR'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+SELECT IF (WoR_Cases = 1).
+EXECUTE.
+
+DATASET NAME WOR_MED19_Tussenbestand.
+
+
+
+*INDELING IN GROEPEN MAKEN EN DE RIJEN TERUG BRENGEN NAAR 1 RIJ PER PERSOON.
+*stap 1 zorg dat de string variabele expliciet als string wodt gebruikt. 
+STRING Y19_ATC4 (A10).
+COMPUTE Y19_ATC4 = RTRIM(ATC4).
+EXECUTE.
+
+*stap 2: maak de binaire variabele op basis van specifieke codes.
+COMPUTE Y19_DIABETES = (Y19_ATC4 = "A10A" OR Y19_ATC4 = "A10B").
+EXECUTE.
+
+
+*stap 3a nieuwe variabelemaken met de eerste letter van NEW_ATC4.
+STRING Y19_EERSTE_LETTER (A1).
+COMPUTE Y19_EERSTE_LETTER = CHAR.SUBSTR(Y19_ATC4,1,1).
+EXECUTE.
+
+*stap 3b binaire variabele maken op basis van de eerste letter. 
+COMPUTE Y19_MED_A = (Y19_EERSTE_LETTER = "A").
+COMPUTE Y19_MED_B = (Y19_EERSTE_LETTER = "B").
+COMPUTE Y19_MED_C = (Y19_EERSTE_LETTER = "C").
+COMPUTE Y19_MED_D = (Y19_EERSTE_LETTER = "D").
+COMPUTE Y19_MED_G = (Y19_EERSTE_LETTER = "G").
+COMPUTE Y19_MED_H = (Y19_EERSTE_LETTER = "H").
+COMPUTE Y19_MED_J = (Y19_EERSTE_LETTER = "J").
+COMPUTE Y19_MED_L = (Y19_EERSTE_LETTER = "L").
+COMPUTE Y19_MED_M = (Y19_EERSTE_LETTER = "M").
+COMPUTE Y19_MED_N = (Y19_EERSTE_LETTER = "N").
+COMPUTE Y19_MED_P = (Y19_EERSTE_LETTER = "P").
+COMPUTE Y19_MED_R = (Y19_EERSTE_LETTER = "R").
+COMPUTE Y19_MED_S = (Y19_EERSTE_LETTER = "S").
+COMPUTE Y19_MED_V = (Y19_EERSTE_LETTER = "V" OR Y19_EERSTE_LETTER = "Y").
+EXECUTE.
+
+
+*stap 4 labels toevoegen.
+VARIABLE LABELS Y19_DIABETES "DIABETES"
+Y19_MED_A "ALIMENTARY TRACT AND METABOLISM"
+Y19_MED_B "BLOOD AND BLOOD FORMING ORGANS"
+Y19_MED_C "CARDIOVASCULAR SYSTEM"
+Y19_MED_D "DERMATOLOGICALS"
+Y19_MED_G "GENITO URINARY SYSTEM AND SEX HORMONES"
+Y19_MED_H "SYSTEMIC HORMONAL PREPARATIONS, EXCL. SEX HORMONES AND INSULINS"
+Y19_MED_J "ANTIINFECTIVES FOR SYSTEMIC USE"
+Y19_MED_L "ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS"
+Y19_MED_M "MUSCULO-SKELETAL SYSTEM"
+Y19_MED_N "NERVOUS SYSTEM"
+Y19_MED_P "ANTIPARASITIC PRODUCS, INSECTICIDES AND REPELLENTS"
+Y19_MED_R "RESPIRATORY SYSTEM"
+Y19_MED_S "SENSORY ORGANS"
+Y19_MED_V "VARIOUS".
+
+VALUE LABELS Y19_DIABETES
+Y19_MED_A
+Y19_MED_B
+Y19_MED_C
+Y19_MED_D
+Y19_MED_G
+Y19_MED_H
+Y19_MED_J
+Y19_MED_L
+Y19_MED_M
+Y19_MED_N
+Y19_MED_P
+Y19_MED_R
+Y19_MED_S
+Y19_MED_V
+0 "niet voorgeschreven"
+1 "voorgeschreven".
+EXECUTE.
+
+*stap 5 reduceer dataset tot 1 rij per persoon en overschrijf bestaande variabelen.
+AGGREGATE
+/OUTFILE=* MODE=ADDVARIABLES OVERWRITE=YES
+/BREAK=RINPERSOONS RINPERSOON
+/Y19_DIABETES
+Y19_MED_A
+Y19_MED_B
+Y19_MED_C
+Y19_MED_D
+Y19_MED_G
+Y19_MED_H
+Y19_MED_J
+Y19_MED_L
+Y19_MED_M
+Y19_MED_N
+Y19_MED_P
+Y19_MED_R
+Y19_MED_S
+Y19_MED_V = MAX (Y19_DIABETES
+Y19_MED_A
+Y19_MED_B
+Y19_MED_C
+Y19_MED_D
+Y19_MED_G
+Y19_MED_H
+Y19_MED_J
+Y19_MED_L
+Y19_MED_M
+Y19_MED_N
+Y19_MED_P
+Y19_MED_R
+Y19_MED_S
+Y19_MED_V).
+
+
+SORT CASES BY RINPersoon(A) RINPERSOONS(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPersoon RINPERSOONS
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast=1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+*NU weer aan het WoR bestand koppelen zodat ook de mensen die geen med gebruiken in dit jaar weer in de dataset terecht komen. 
+
+DATASET ACTIVATE WOR_MED19_Tussenbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+MATCH FILES /FILE=WoR
+/TABLE='WOR_MED19_Tussenbestand'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+
+DATASET NAME WOR_MED19.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED19.sav".
+DATASET CLOSE WOR_MED19.
+DATASET CLOSE MED19.
+DATASET CLOSE WOR_MED19_Tussenbestand.
+
+
+**************************************************************2020***********************************************************
+
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2020\MEDICIJN2020TABV2.sav".
+DATASET NAME MED20.
+
+DATASET ACTIVATE MED20.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WOR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED20.
+MATCH FILES /FILE=MED20
+/TABLE='WOR'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+SELECT IF (WoR_Cases = 1).
+EXECUTE.
+
+
+DATASET NAME WOR_MED20_Tussenbestand.
+
+*INDELING IN GROEPEN MAKEN EN DE RIJEN TERUG BRENGEN NAAR 1 RIJ PER PERSOON.
+*stap 1 zorg dat de string variabele expliciet als string wodt gebruikt. 
+STRING Y20_ATC4 (A10).
+COMPUTE Y20_ATC4 = RTRIM(ATC4).
+EXECUTE.
+
+*stap 2: maak de binaire variabele op basis van specifieke codes.
+COMPUTE Y20_DIABETES = (Y20_ATC4 = "A10A" OR Y20_ATC4 = "A10B").
+EXECUTE.
+
+*stap 3a nieuwe variabelemaken met de eerste letter van NEW_ATC4.
+STRING Y20_EERSTE_LETTER (A1).
+COMPUTE Y20_EERSTE_LETTER = CHAR.SUBSTR(Y20_ATC4,1,1).
+EXECUTE.
+
+*stap 3b binaire variabele maken op basis van de eerste letter. 
+COMPUTE Y20_MED_A = (Y20_EERSTE_LETTER = "A").
+COMPUTE Y20_MED_B = (Y20_EERSTE_LETTER = "B").
+COMPUTE Y20_MED_C = (Y20_EERSTE_LETTER = "C").
+COMPUTE Y20_MED_D = (Y20_EERSTE_LETTER = "D").
+COMPUTE Y20_MED_G = (Y20_EERSTE_LETTER = "G").
+COMPUTE Y20_MED_H = (Y20_EERSTE_LETTER = "H").
+COMPUTE Y20_MED_J = (Y20_EERSTE_LETTER = "J").
+COMPUTE Y20_MED_L = (Y20_EERSTE_LETTER = "L").
+COMPUTE Y20_MED_M = (Y20_EERSTE_LETTER = "M").
+COMPUTE Y20_MED_N = (Y20_EERSTE_LETTER = "N").
+COMPUTE Y20_MED_P = (Y20_EERSTE_LETTER = "P").
+COMPUTE Y20_MED_R = (Y20_EERSTE_LETTER = "R").
+COMPUTE Y20_MED_S = (Y20_EERSTE_LETTER = "S").
+COMPUTE Y20_MED_V = (Y20_EERSTE_LETTER = "V" OR Y20_EERSTE_LETTER = "Y").
+EXECUTE.
+
+
+*stap 4 labels toevoegen.
+VARIABLE LABELS Y20_DIABETES "DIABETES"
+Y20_MED_A "ALIMENTARY TRACT AND METABOLISM"
+Y20_MED_B "BLOOD AND BLOOD FORMING ORGANS"
+Y20_MED_C "CARDIOVASCULAR SYSTEM"
+Y20_MED_D "DERMATOLOGICALS"
+Y20_MED_G "GENITO URINARY SYSTEM AND SEX HORMONES"
+Y20_MED_H "SYSTEMIC HORMONAL PREPARATIONS, EXCL. SEX HORMONES AND INSULINS"
+Y20_MED_J "ANTIINFECTIVES FOR SYSTEMIC USE"
+Y20_MED_L "ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS"
+Y20_MED_M "MUSCULO-SKELETAL SYSTEM"
+Y20_MED_N "NERVOUS SYSTEM"
+Y20_MED_P "ANTIPARASITIC PRODUCS, INSECTICIDES AND REPELLENTS"
+Y20_MED_R "RESPIRATORY SYSTEM"
+Y20_MED_S "SENSORY ORGANS"
+Y20_MED_V "VARIOUS".
+
+VALUE LABELS Y20_DIABETES
+Y20_MED_A
+Y20_MED_B
+Y20_MED_C
+Y20_MED_D
+Y20_MED_G
+Y20_MED_H
+Y20_MED_J
+Y20_MED_L
+Y20_MED_M
+Y20_MED_N
+Y20_MED_P
+Y20_MED_R
+Y20_MED_S
+Y20_MED_V
+0 "niet voorgeschreven"
+1 "voorgeschreven".
+EXECUTE.
+
+*stap 5 reduceer dataset tot 1 rij per persoon en overschrijf bestaande variabelen.
+AGGREGATE
+/OUTFILE=* MODE=ADDVARIABLES OVERWRITE=YES
+/BREAK=RINPERSOONS RINPERSOON
+/Y20_DIABETES
+Y20_MED_A
+Y20_MED_B
+Y20_MED_C
+Y20_MED_D
+Y20_MED_G
+Y20_MED_H
+Y20_MED_J
+Y20_MED_L
+Y20_MED_M
+Y20_MED_N
+Y20_MED_P
+Y20_MED_R
+Y20_MED_S
+Y20_MED_V = MAX (Y20_DIABETES
+Y20_MED_A
+Y20_MED_B
+Y20_MED_C
+Y20_MED_D
+Y20_MED_G
+Y20_MED_H
+Y20_MED_J
+Y20_MED_L
+Y20_MED_M
+Y20_MED_N
+Y20_MED_P
+Y20_MED_R
+Y20_MED_S
+Y20_MED_V).
+
+
+SORT CASES BY RINPersoon(A) RINPERSOONS(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPersoon RINPERSOONS
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast=1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+*NU weer aan het WoR bestand koppelen zodat ook de mensen die geen med gebruiken in dit jaar weer in de dataset terecht komen. 
+
+DATASET ACTIVATE WOR_MED20_Tussenbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+MATCH FILES /FILE=WoR
+/TABLE='WOR_MED20_Tussenbestand'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+DATASET NAME WOR_MED20.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED20.sav".
+DATASET CLOSE WOR_MED20.
+DATASET CLOSE MED20.
+DATASET CLOSE WOR_MED20_Tussenbestand.
+
+**************************************************** 2021**********************************************************************
+
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2021\MEDICIJN2021TABV1.sav".
+DATASET NAME MED21.
+
+
+DATASET ACTIVATE MED21.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WOR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED21.
+MATCH FILES /FILE=MED21
+/TABLE='WOR'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+SELECT IF (WoR_Cases = 1).
+EXECUTE.
+
+DATASET NAME WOR_MED21_Tussenbestand.
+
+
+*INDELING IN GROEPEN MAKEN EN DE RIJEN TERUG BRENGEN NAAR 1 RIJ PER PERSOON.
+*stap 1 zorg dat de string variabele expliciet als string wodt gebruikt. 
+STRING Y21_ATC4 (A10).
+COMPUTE Y21_ATC4 = RTRIM(ATC4).
+EXECUTE.
+
+*stap 2: maak de binaire variabele op basis van specifieke codes.
+COMPUTE Y21_DIABETES = (Y21_ATC4 = "A10A" OR Y21_ATC4 = "A10B").
+EXECUTE.
+
+
+*stap 3a nieuwe variabelemaken met de eerste letter van NEW_ATC4.
+STRING Y21_EERSTE_LETTER (A1).
+COMPUTE Y21_EERSTE_LETTER = CHAR.SUBSTR(Y21_ATC4,1,1).
+EXECUTE.
+
+*stap 3b binaire variabele maken op basis van de eerste letter. 
+COMPUTE Y21_MED_A = (Y21_EERSTE_LETTER = "A").
+COMPUTE Y21_MED_B = (Y21_EERSTE_LETTER = "B").
+COMPUTE Y21_MED_C = (Y21_EERSTE_LETTER = "C").
+COMPUTE Y21_MED_D = (Y21_EERSTE_LETTER = "D").
+COMPUTE Y21_MED_G = (Y21_EERSTE_LETTER = "G").
+COMPUTE Y21_MED_H = (Y21_EERSTE_LETTER = "H").
+COMPUTE Y21_MED_J = (Y21_EERSTE_LETTER = "J").
+COMPUTE Y21_MED_L = (Y21_EERSTE_LETTER = "L").
+COMPUTE Y21_MED_M = (Y21_EERSTE_LETTER = "M").
+COMPUTE Y21_MED_N = (Y21_EERSTE_LETTER = "N").
+COMPUTE Y21_MED_P = (Y21_EERSTE_LETTER = "P").
+COMPUTE Y21_MED_R = (Y21_EERSTE_LETTER = "R").
+COMPUTE Y21_MED_S = (Y21_EERSTE_LETTER = "S").
+COMPUTE Y21_MED_V = (Y21_EERSTE_LETTER = "V" OR Y21_EERSTE_LETTER = "Y").
+EXECUTE.
+
+
+*stap 4 labels toevoegen.
+VARIABLE LABELS Y21_DIABETES "DIABETES"
+Y21_MED_A "ALIMENTARY TRACT AND METABOLISM"
+Y21_MED_B "BLOOD AND BLOOD FORMING ORGANS"
+Y21_MED_C "CARDIOVASCULAR SYSTEM"
+Y21_MED_D "DERMATOLOGICALS"
+Y21_MED_G "GENITO URINARY SYSTEM AND SEX HORMONES"
+Y21_MED_H "SYSTEMIC HORMONAL PREPARATIONS, EXCL. SEX HORMONES AND INSULINS"
+Y21_MED_J "ANTIINFECTIVES FOR SYSTEMIC USE"
+Y21_MED_L "ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS"
+Y21_MED_M "MUSCULO-SKELETAL SYSTEM"
+Y21_MED_N "NERVOUS SYSTEM"
+Y21_MED_P "ANTIPARASITIC PRODUCS, INSECTICIDES AND REPELLENTS"
+Y21_MED_R "RESPIRATORY SYSTEM"
+Y21_MED_S "SENSORY ORGANS"
+Y21_MED_V "VARIOUS".
+
+VALUE LABELS Y21_DIABETES
+Y21_MED_A
+Y21_MED_B
+Y21_MED_C
+Y21_MED_D
+Y21_MED_G
+Y21_MED_H
+Y21_MED_J
+Y21_MED_L
+Y21_MED_M
+Y21_MED_N
+Y21_MED_P
+Y21_MED_R
+Y21_MED_S
+Y21_MED_V
+0 "niet voorgeschreven"
+1 "voorgeschreven".
+EXECUTE.
+
+*stap 5 reduceer dataset tot 1 rij per persoon en overschrijf bestaande variabelen.
+AGGREGATE
+/OUTFILE=* MODE=ADDVARIABLES OVERWRITE=YES
+/BREAK=RINPERSOONS RINPERSOON
+/Y21_DIABETES
+Y21_MED_A
+Y21_MED_B
+Y21_MED_C
+Y21_MED_D
+Y21_MED_G
+Y21_MED_H
+Y21_MED_J
+Y21_MED_L
+Y21_MED_M
+Y21_MED_N
+Y21_MED_P
+Y21_MED_R
+Y21_MED_S
+Y21_MED_V = MAX (Y21_DIABETES
+Y21_MED_A
+Y21_MED_B
+Y21_MED_C
+Y21_MED_D
+Y21_MED_G
+Y21_MED_H
+Y21_MED_J
+Y21_MED_L
+Y21_MED_M
+Y21_MED_N
+Y21_MED_P
+Y21_MED_R
+Y21_MED_S
+Y21_MED_V).
+
+
+SORT CASES BY RINPersoon(A) RINPERSOONS(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPersoon RINPERSOONS
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast=1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+*NU weer aan het WoR bestand koppelen zodat ook de mensen die geen med gebruiken in dit jaar weer in de dataset terecht komen. 
+
+DATASET ACTIVATE WOR_MED21_Tussenbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+MATCH FILES /FILE=WoR
+/TABLE='WOR_MED21_Tussenbestand'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+DATASET NAME WOR_MED21.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED21.sav".
+DATASET CLOSE WOR_MED21.
+DATASET CLOSE MED21.
+DATASET CLOSE WOR_MED21_Tussenbestand.
+
+
+
+
+**************************************************** 2022**********************************************************************
+
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2022\MEDICIJN2022TABV1.sav".
+DATASET NAME MED22.
+
+DATASET ACTIVATE MED22.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WOR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED22.
+MATCH FILES /FILE=MED22
+/TABLE='WOR'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+SELECT IF (WoR_Cases = 1).
+EXECUTE.
+
+DATASET NAME WOR_MED22_Tussenbestand.
+
+
+*INDELING IN GROEPEN MAKEN EN DE RIJEN TERUG BRENGEN NAAR 1 RIJ PER PERSOON.
+*stap 1 zorg dat de string variabele expliciet als string wodt gebruikt. 
+STRING Y22_ATC4 (A10).
+COMPUTE Y22_ATC4 = RTRIM(ATC4).
+EXECUTE.
+
+*stap 2: maak de binaire variabele op basis van specifieke codes.
+COMPUTE Y22_DIABETES = (Y22_ATC4 = "A10A" OR Y22_ATC4 = "A10B").
+EXECUTE.
+
+
+*stap 3a nieuwe variabelemaken met de eerste letter van NEW_ATC4.
+STRING Y22_EERSTE_LETTER (A1).
+COMPUTE Y22_EERSTE_LETTER = CHAR.SUBSTR(Y22_ATC4,1,1).
+EXECUTE.
+
+*stap 3b binaire variabele maken op basis van de eerste letter. 
+COMPUTE Y22_MED_A = (Y22_EERSTE_LETTER = "A").
+COMPUTE Y22_MED_B = (Y22_EERSTE_LETTER = "B").
+COMPUTE Y22_MED_C = (Y22_EERSTE_LETTER = "C").
+COMPUTE Y22_MED_D = (Y22_EERSTE_LETTER = "D").
+COMPUTE Y22_MED_G = (Y22_EERSTE_LETTER = "G").
+COMPUTE Y22_MED_H = (Y22_EERSTE_LETTER = "H").
+COMPUTE Y22_MED_J = (Y22_EERSTE_LETTER = "J").
+COMPUTE Y22_MED_L = (Y22_EERSTE_LETTER = "L").
+COMPUTE Y22_MED_M = (Y22_EERSTE_LETTER = "M").
+COMPUTE Y22_MED_N = (Y22_EERSTE_LETTER = "N").
+COMPUTE Y22_MED_P = (Y22_EERSTE_LETTER = "P").
+COMPUTE Y22_MED_R = (Y22_EERSTE_LETTER = "R").
+COMPUTE Y22_MED_S = (Y22_EERSTE_LETTER = "S").
+COMPUTE Y22_MED_V = (Y22_EERSTE_LETTER = "V" OR Y22_EERSTE_LETTER = "Y").
+EXECUTE.
+
+
+*stap 4 labels toevoegen.
+VARIABLE LABELS Y22_DIABETES "DIABETES"
+Y22_MED_A "ALIMENTARY TRACT AND METABOLISM"
+Y22_MED_B "BLOOD AND BLOOD FORMING ORGANS"
+Y22_MED_C "CARDIOVASCULAR SYSTEM"
+Y22_MED_D "DERMATOLOGICALS"
+Y22_MED_G "GENITO URINARY SYSTEM AND SEX HORMONES"
+Y22_MED_H "SYSTEMIC HORMONAL PREPARATIONS, EXCL. SEX HORMONES AND INSULINS"
+Y22_MED_J "ANTIINFECTIVES FOR SYSTEMIC USE"
+Y22_MED_L "ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS"
+Y22_MED_M "MUSCULO-SKELETAL SYSTEM"
+Y22_MED_N "NERVOUS SYSTEM"
+Y22_MED_P "ANTIPARASITIC PRODUCS, INSECTICIDES AND REPELLENTS"
+Y22_MED_R "RESPIRATORY SYSTEM"
+Y22_MED_S "SENSORY ORGANS"
+Y22_MED_V "VARIOUS".
+
+VALUE LABELS Y22_DIABETES
+Y22_MED_A
+Y22_MED_B
+Y22_MED_C
+Y22_MED_D
+Y22_MED_G
+Y22_MED_H
+Y22_MED_J
+Y22_MED_L
+Y22_MED_M
+Y22_MED_N
+Y22_MED_P
+Y22_MED_R
+Y22_MED_S
+Y22_MED_V
+0 "niet voorgeschreven"
+1 "voorgeschreven".
+EXECUTE.
+
+*stap 5 reduceer dataset tot 1 rij per persoon en overschrijf bestaande variabelen.
+AGGREGATE
+/OUTFILE=* MODE=ADDVARIABLES OVERWRITE=YES
+/BREAK=RINPERSOONS RINPERSOON
+/Y22_DIABETES
+Y22_MED_A
+Y22_MED_B
+Y22_MED_C
+Y22_MED_D
+Y22_MED_G
+Y22_MED_H
+Y22_MED_J
+Y22_MED_L
+Y22_MED_M
+Y22_MED_N
+Y22_MED_P
+Y22_MED_R
+Y22_MED_S
+Y22_MED_V = MAX (Y22_DIABETES
+Y22_MED_A
+Y22_MED_B
+Y22_MED_C
+Y22_MED_D
+Y22_MED_G
+Y22_MED_H
+Y22_MED_J
+Y22_MED_L
+Y22_MED_M
+Y22_MED_N
+Y22_MED_P
+Y22_MED_R
+Y22_MED_S
+Y22_MED_V).
+
+
+SORT CASES BY RINPersoon(A) RINPERSOONS(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPersoon RINPERSOONS
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast=1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+*NU weer aan het WoR bestand koppelen zodat ook de mensen die geen med gebruiken in dit jaar weer in de dataset terecht komen. 
+
+DATASET ACTIVATE WOR_MED22_Tussenbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+MATCH FILES /FILE=WoR
+/TABLE='WOR_MED22_Tussenbestand'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+DATASET NAME WOR_MED22.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED22.sav".
+DATASET CLOSE WOR_MED22.
+DATASET CLOSE MED22.
+DATASET CLOSE WOR_MED22_Tussenbestand.
+
+
+**************************************************** 2023**********************************************************************
+
+GET FILE "G:\GezondheidWelzijn\MEDICIJNTAB\2023\MEDICIJN2023TABV1.sav".
+DATASET NAME MED23.
+
+DATASET ACTIVATE MED23.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WOR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED23.
+MATCH FILES /FILE=MED23
+/TABLE='WOR'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+SELECT IF (WoR_Cases = 1).
+EXECUTE.
+
+DATASET NAME WOR_MED23_Tussenbestand.
+
+
+*INDELING IN GROEPEN MAKEN EN DE RIJEN TERUG BRENGEN NAAR 1 RIJ PER PERSOON.
+*stap 1 zorg dat de string variabele expliciet als string wodt gebruikt. 
+STRING Y23_ATC4 (A10).
+COMPUTE Y23_ATC4 = RTRIM(ATC4).
+EXECUTE.
+
+*stap 2: maak de binaire variabele op basis van specifieke codes.
+COMPUTE Y23_DIABETES = (Y23_ATC4 = "A10A" OR Y23_ATC4 = "A10B").
+EXECUTE.
+
+
+*stap 3a nieuwe variabelemaken met de eerste letter van NEW_ATC4.
+STRING Y23_EERSTE_LETTER (A1).
+COMPUTE Y23_EERSTE_LETTER = CHAR.SUBSTR(Y23_ATC4,1,1).
+EXECUTE.
+
+*stap 3b binaire variabele maken op basis van de eerste letter. 
+COMPUTE Y23_MED_A = (Y23_EERSTE_LETTER = "A").
+COMPUTE Y23_MED_B = (Y23_EERSTE_LETTER = "B").
+COMPUTE Y23_MED_C = (Y23_EERSTE_LETTER = "C").
+COMPUTE Y23_MED_D = (Y23_EERSTE_LETTER = "D").
+COMPUTE Y23_MED_G = (Y23_EERSTE_LETTER = "G").
+COMPUTE Y23_MED_H = (Y23_EERSTE_LETTER = "H").
+COMPUTE Y23_MED_J = (Y23_EERSTE_LETTER = "J").
+COMPUTE Y23_MED_L = (Y23_EERSTE_LETTER = "L").
+COMPUTE Y23_MED_M = (Y23_EERSTE_LETTER = "M").
+COMPUTE Y23_MED_N = (Y23_EERSTE_LETTER = "N").
+COMPUTE Y23_MED_P = (Y23_EERSTE_LETTER = "P").
+COMPUTE Y23_MED_R = (Y23_EERSTE_LETTER = "R").
+COMPUTE Y23_MED_S = (Y23_EERSTE_LETTER = "S").
+COMPUTE Y23_MED_V = (Y23_EERSTE_LETTER = "V" OR Y23_EERSTE_LETTER = "Y").
+EXECUTE.
+
+
+*stap 4 labels toevoegen.
+VARIABLE LABELS Y23_DIABETES "DIABETES"
+Y23_MED_A "ALIMENTARY TRACT AND METABOLISM"
+Y23_MED_B "BLOOD AND BLOOD FORMING ORGANS"
+Y23_MED_C "CARDIOVASCULAR SYSTEM"
+Y23_MED_D "DERMATOLOGICALS"
+Y23_MED_G "GENITO URINARY SYSTEM AND SEX HORMONES"
+Y23_MED_H "SYSTEMIC HORMONAL PREPARATIONS, EXCL. SEX HORMONES AND INSULINS"
+Y23_MED_J "ANTIINFECTIVES FOR SYSTEMIC USE"
+Y23_MED_L "ANTINEOPLASTIC AND IMMUNOMODULATING AGENTS"
+Y23_MED_M "MUSCULO-SKELETAL SYSTEM"
+Y23_MED_N "NERVOUS SYSTEM"
+Y23_MED_P "ANTIPARASITIC PRODUCS, INSECTICIDES AND REPELLENTS"
+Y23_MED_R "RESPIRATORY SYSTEM"
+Y23_MED_S "SENSORY ORGANS"
+Y23_MED_V "VARIOUS".
+
+VALUE LABELS Y23_DIABETES
+Y23_MED_A
+Y23_MED_B
+Y23_MED_C
+Y23_MED_D
+Y23_MED_G
+Y23_MED_H
+Y23_MED_J
+Y23_MED_L
+Y23_MED_M
+Y23_MED_N
+Y23_MED_P
+Y23_MED_R
+Y23_MED_S
+Y23_MED_V
+0 "niet voorgeschreven"
+1 "voorgeschreven".
+EXECUTE.
+
+*stap 5 reduceer dataset tot 1 rij per persoon en overschrijf bestaande variabelen.
+AGGREGATE
+/OUTFILE=* MODE=ADDVARIABLES OVERWRITE=YES
+/BREAK=RINPERSOONS RINPERSOON
+/Y23_DIABETES
+Y23_MED_A
+Y23_MED_B
+Y23_MED_C
+Y23_MED_D
+Y23_MED_G
+Y23_MED_H
+Y23_MED_J
+Y23_MED_L
+Y23_MED_M
+Y23_MED_N
+Y23_MED_P
+Y23_MED_R
+Y23_MED_S
+Y23_MED_V = MAX (Y23_DIABETES
+Y23_MED_A
+Y23_MED_B
+Y23_MED_C
+Y23_MED_D
+Y23_MED_G
+Y23_MED_H
+Y23_MED_J
+Y23_MED_L
+Y23_MED_M
+Y23_MED_N
+Y23_MED_P
+Y23_MED_R
+Y23_MED_S
+Y23_MED_V).
+
+
+SORT CASES BY RINPersoon(A) RINPERSOONS(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPersoon RINPERSOONS
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF (PrimaryLast=1).
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE.
+
+
+*NU weer aan het WoR bestand koppelen zodat ook de mensen die geen med gebruiken in dit jaar weer in de dataset terecht komen. 
+
+DATASET ACTIVATE WOR_MED23_Tussenbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WoR.
+MATCH FILES /FILE=WoR
+/TABLE='WOR_MED23_Tussenbestand'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+DATASET NAME WOR_MED23.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED23.sav".
+DATASET CLOSE WOR_MED23.
+DATASET CLOSE MED23.
+DATASET CLOSE WOR_MED23_Tussenbestand.
+
+
+****************************Alles aan elkaar koppelen**********************************************
+*Nu moet ik alle jaren aan elkaar koppelen om het vervolgens ook weer aan de uiteindelijke dataset te koppelen.
+
+GET FILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED19.sav".
+SORT CASES BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+DATASET NAME WOR_MED19.
+
+GET FILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED20.sav".
+SORT CASES BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+DATASET NAME WOR_MED20.
+
+MATCH FILES
+/FILE=WOR_MED19
+/TABLE=WOR_MED20
+/BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+EXECUTE.
+DATASET NAME WOR_MED1920.
+
+GET FILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED21.sav".
+SORT CASES BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+DATASET NAME WOR_MED21.
+
+
+MATCH FILES
+/FILE= WOR_MED1920
+/TABLE = WOR_MED21
+/BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+EXECUTE.
+DATASET NAME WOR_MED1921.
+
+GET FILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED22.sav".
+SORT CASES BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+DATASET NAME WOR_MED22.
+
+
+MATCH FILES
+/FILE= WOR_MED1921
+/TABLE = WOR_MED22
+/BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+EXECUTE.
+DATASET NAME WOR_MED1922.
+
+
+GET FILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED23.sav".
+SORT CASES BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+DATASET NAME WOR_MED23.
+
+
+MATCH FILES
+/FILE=WOR_MED1922
+/TABLE = WOR_MED23
+/BY Geboortedatum RINPERSOONS RINPersoon WoR_cases.
+EXECUTE.
+DATASET NAME WOR_MED1923.
+
+DELETE VARIABLES
+ATC4
+Y19_ATC4
+Y19_EERSTE_LETTER
+DDD
+Y20_ATC4
+Y20_EERSTE_LETTER
+Y21_ATC4
+Y21_EERSTE_LETTER
+Y22_ATC4
+Y22_EERSTE_LETTER
+Y23_ATC4
+Y23_EERSTE_LETTER.
+
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED19_23.sav".
+DATASET CLOSE WOR_MED19.
+DATASET CLOSE WOR_MED1920.
+DATASET CLOSE WOR_MED1921.
+DATASET CLOSE WOR_MED1922.
+DATASET CLOSE WOR_MED20.
+DATASET CLOSE WOR_MED21.
+DATASET CLOSE WOR_MED22.
+DATASET CLOSE WOR_MED23.
+
+
+*****************Dit nu aan de volledige dataset koppelen.*************************************************
+
+GET FILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_MED19_23.sav".
+DATASET NAME MED. 
+
+GET FILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\WOR_FIN_ZK_GGZ_WMO_POLYF.sav".
+DATASET NAME BASIS.
+
+
+DATASET ACTIVATE BASIS.
+SORT CASES BY RINPERSOONS RINPersoon.
+DATASET ACTIVATE MED.
+SORT CASES BY RINPERSOONS RINPersoon.
+DATASET ACTIVATE BASIS.
+MATCH FILES /FILE=*
+  /TABLE='MED'
+  /RENAME (Geboortedatum = d0) 
+  /BY RINPERSOONS RINPersoon
+  /DROP= d0.
+EXECUTE.
+
+
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\WOR_FIN_ZORGGEBRUIK.sav".
+
+
+********************************************************MHK BEREKENEN******************************************************
+meerjarig hoge kosten
+
+**Allereerst moet ik de meerjarig hoge kosten (MHK) grens berekenen.
+
+* Dit doe ik door random 10 of 5 % van de volledige dataset van CBS te pakken (makkelijker om mee te rekenen, anders loopt ie vast). 
+
+ * Meerjarig hoge kosten (MHK): zeven groepen voor verzekerden met 
+- 3x kosten (in jaar t-3, t-2, t-1) in de 
+    - top 15%, 
+    - top 10%, 
+    - top 7%, 
+    - top 4%, 
+    - top 1,5%
+    - top 0,5%
+    2x kosten in de top 10% in jaar t-2 en t-1 en niet in de top15% in jaar t-3
+    Evt nog risicoklassen 8 en 9:
+    - in elk van de jaren t-3, t-2 en t-1 kosten beneden het 70ste percentiel
+   
+*2022 is t0 dus 2021 is t-1, 2020 is t-2 en 2019 is t-3 --> deze bestanden eerst koppelen, dan per jaar berekenen wat de grenswaarden zijn.
+
+GET
+  FILE='G:\Bevolking\GBAPERSOONTAB\2023\GBAPERSOON2023TABV1.sav'.
+DATASET NAME Hoofdbestand WINDOW=FRONT.
+
+    
+DATASET ACTIVATE Hoofdbestand.
+GET FILE='G:\GezondheidWelzijn\ZVWZORGKOSTENTAB\2019\ZVWZORGKOSTEN2019TABV2.sav'.
+DATASET NAME Zorgkosten2019.
+DATASET ACTIVATE Hoofdbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Zorgkosten2019.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Hoofdbestand.
+MATCH FILES /FILE=*
+  /FILE='Zorgkosten2019'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Zorgkosten2019.
+
+
+DELETE VARIABLES
+NOPZVWKFYSIOTHERAPIE
+NOPZVWKPARAMEDISCHOV
+NOPZVWKVERLOSKUNDE
+NOPZVWKKRAAMZORG
+NOPZVWKGGZMV
+NOPZVWKGGZZVINST
+NOPZVWKGGZZVZELF
+NOPZVWKGGZOVERIG
+NOPZVWKZIEKENVERVOERZIT
+NOPZVWKZIEKENVERVOERLIG
+NOPZVWKLANGDGGZ
+NOPZVWKBUITENLGRENS
+NOPZVWKBUITENLZINL
+NOPZVWKVRIJWILLIGEIGENRISICO
+ZVWKOPHOOGFACTOR
+ZVWKHUISARTS
+NOPZVWKEERSTELIJNSOND
+NOPZVWKHUISARTSINSCHRIJF
+NOPZVWKHUISARTSCONSULT
+NOPZVWKHUISARTSOVERIG
+ZVWKFARMACIE
+ZVWKMONDZORG
+ZVWKZIEKENHUIS
+ZVWKPARAMEDISCH
+ZVWKHULPMIDDEL
+ZVWKZIEKENVERVOER
+ZVWKGEBOORTEZORG
+ZVWKBUITENLAND
+ZVWKOVERIG
+ZVWKEERSTELIJNSPSYCHO
+ZVWKGGZ
+ZVWKGENBASGGZ
+ZVWKSPECGGZ
+ZVWKGERIATRISCH
+ZVWKWYKVERPLEGING 
+ZVWKMULTIDISC
+ZVWKZINTUIGLIJK 
+ZVWKEERSTELIJNSVERBLIJF.
+EXECUTE.
+
+RENAME VARIABLES (ZVWKTOTAAL = Y19_ZVWKTOTAAL).
+EXECUTE.
+
+
+DATASET ACTIVATE Hoofdbestand.
+GET FILE='G:\GezondheidWelzijn\ZVWZORGKOSTENTAB\2020\ZVWZORGKOSTEN2020TABV2.sav'.
+DATASET NAME Zorgkosten2020.
+DATASET ACTIVATE Hoofdbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Zorgkosten2020.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Hoofdbestand.
+MATCH FILES /FILE=*
+  /FILE='Zorgkosten2020'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Zorgkosten2020.
+
+DELETE VARIABLES
+NOPZVWKFYSIOTHERAPIE
+NOPZVWKPARAMEDISCHOV
+NOPZVWKVERLOSKUNDE
+NOPZVWKKRAAMZORG
+NOPZVWKGGZMV
+NOPZVWKGGZZVINST
+NOPZVWKGGZZVZELF
+NOPZVWKGGZOVERIG
+NOPZVWKZIEKENVERVOERZIT
+NOPZVWKZIEKENVERVOERLIG
+NOPZVWKLANGDGGZ
+NOPZVWKBUITENLGRENS
+NOPZVWKBUITENLZINL
+NOPZVWKVRIJWILLIGEIGENRISICO
+ZVWKOPHOOGFACTOR
+ZVWKHUISARTS
+NOPZVWKEERSTELIJNSOND
+NOPZVWKHUISARTSINSCHRIJF
+NOPZVWKHUISARTSCONSULT
+NOPZVWKHUISARTSOVERIG
+ZVWKFARMACIE
+ZVWKMONDZORG
+ZVWKZIEKENHUIS
+ZVWKPARAMEDISCH
+ZVWKHULPMIDDEL
+ZVWKZIEKENVERVOER
+ZVWKGEBOORTEZORG
+ZVWKBUITENLAND
+ZVWKOVERIG
+ZVWKEERSTELIJNSPSYCHO
+ZVWKGGZ
+ZVWKGENBASGGZ
+ZVWKSPECGGZ
+ZVWKGERIATRISCH
+ZVWKWYKVERPLEGING 
+ZVWKMULTIDISC
+ZVWKZINTUIGLIJK 
+ZVWKEERSTELIJNSVERBLIJF.
+EXECUTE.
+
+RENAME VARIABLES (ZVWKTOTAAL = Y20_ZVWKTOTAAL).
+EXECUTE.
+
+
+DATASET ACTIVATE Hoofdbestand.
+GET FILE='G:\GezondheidWelzijn\ZVWZORGKOSTENTAB2021\ZVWZORGKOSTEN2021TABV1.sav'.
+DATASET NAME Zorgkosten2021.
+DATASET ACTIVATE Hoofdbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Zorgkosten2021.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Hoofdbestand.
+MATCH FILES /FILE=*
+  /FILE='Zorgkosten2021'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Zorgkosten2021.
+
+
+DELETE VARIABLES
+NOPZVWKFYSIOTHERAPIE
+NOPZVWKPARAMEDISCHOV
+NOPZVWKVERLOSKUNDE
+NOPZVWKKRAAMZORG
+NOPZVWKGGZMV
+NOPZVWKGGZZVINST
+NOPZVWKGGZZVZELF
+NOPZVWKGGZOVERIG
+NOPZVWKZIEKENVERVOERZIT
+NOPZVWKZIEKENVERVOERLIG
+NOPZVWKLANGDGGZ
+NOPZVWKBUITENLGRENS
+NOPZVWKBUITENLZINL
+NOPZVWKVRIJWILLIGEIGENRISICO
+ZVWKOPHOOGFACTOR
+ZVWKHUISARTS
+NOPZVWKEERSTELIJNSOND
+NOPZVWKHUISARTSINSCHRIJF
+NOPZVWKHUISARTSCONSULT
+NOPZVWKHUISARTSOVERIG
+ZVWKFARMACIE
+ZVWKMONDZORG
+ZVWKZIEKENHUIS
+ZVWKPARAMEDISCH
+ZVWKHULPMIDDEL
+ZVWKZIEKENVERVOER
+ZVWKGEBOORTEZORG
+ZVWKBUITENLAND
+ZVWKOVERIG
+ZVWKEERSTELIJNSPSYCHO
+ZVWKGGZ
+ZVWKGENBASGGZ
+ZVWKSPECGGZ
+ZVWKGERIATRISCH
+ZVWKWYKVERPLEGING 
+ZVWKMULTIDISC
+ZVWKZINTUIGLIJK 
+ZVWKEERSTELIJNSVERBLIJF.
+EXECUTE.
+
+RENAME VARIABLES (ZVWKTOTAAL = Y21_ZVWKTOTAAL).
+EXECUTE.
+
+
+DATASET ACTIVATE Hoofdbestand.
+GET FILE='G:\GezondheidWelzijn\ZVWZORGKOSTENTAB2022\ZVWZORGKOSTEN2022TABV1.sav'.
+DATASET NAME Zorgkosten2022.
+DATASET ACTIVATE Hoofdbestand.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Zorgkosten2022.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Hoofdbestand.
+MATCH FILES /FILE=*
+  /FILE='Zorgkosten2022'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Zorgkosten2022.
+
+
+DELETE VARIABLES
+NOPZVWKFYSIOTHERAPIE
+NOPZVWKPARAMEDISCHOV
+NOPZVWKVERLOSKUNDE
+NOPZVWKKRAAMZORG
+NOPZVWKGGZMV
+NOPZVWKGGZZVINST
+NOPZVWKGGZZVZELF
+NOPZVWKGGZOVERIG
+NOPZVWKZIEKENVERVOERZIT
+NOPZVWKZIEKENVERVOERLIG
+NOPZVWKLANGDGGZ
+NOPZVWKBUITENLGRENS
+NOPZVWKBUITENLZINL
+NOPZVWKVRIJWILLIGEIGENRISICO
+ZVWKOPHOOGFACTOR
+ZVWKHUISARTS
+NOPZVWKEERSTELIJNSOND
+NOPZVWKHUISARTSINSCHRIJF
+NOPZVWKHUISARTSCONSULT
+NOPZVWKHUISARTSOVERIG
+ZVWKFARMACIE
+ZVWKMONDZORG
+ZVWKZIEKENHUIS
+ZVWKPARAMEDISCH
+ZVWKHULPMIDDEL
+ZVWKZIEKENVERVOER
+ZVWKGEBOORTEZORG
+ZVWKBUITENLAND
+ZVWKOVERIG
+ZVWKEERSTELIJNSPSYCHO
+ZVWKGGZ
+ZVWKGENBASGGZ
+ZVWKSPECGGZ
+ZVWKGERIATRISCH
+ZVWKWYKVERPLEGING 
+ZVWKMULTIDISC
+ZVWKZINTUIGLIJK 
+ZVWKEERSTELIJNSVERBLIJF.
+EXECUTE.
+
+RENAME VARIABLES (ZVWKTOTAAL = Y22_ZVWKTOTAAL).
+EXECUTE.
+
+
+**************************grenswaarden per jaar bepalen.********************************
+
+EXAMINE VARIABLES Y19_ZVWKTOTAAL
+ Y20_ZVWKTOTAAL
+  Y21_ZVWKTOTAAL
+   Y22_ZVWKTOTAAL
+   /STATISTICS = NONE
+   /PERCENTILES (70,85,90,93,96,98.5,99.5).
+
+
+***************************in WoR dataset variabele aanmaken*********************
+
+GET FILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\WOR_FIN_ZORGGEBRUIK.sav".
+DATASET NAME WoR.
+DATASET ACTIVATE WoR.
+
+
+COMPUTE MHK = 999.
+COMPUTE MHK_19 = 999.
+COMPUTE MHK_20 = 999.
+COMPUTE MHK_21 = 999.
+COMPUTE MHK_22 = 999.
+
+IF (Y19_ZVWKTOTAAL<1285 ) MHK_19 = 0.
+IF (Y19_ZVWKTOTAAL>=1285 AND Y19_ZVWKTOTAAL<3241) MHK_19 = 1.
+IF (Y19_ZVWKTOTAAL>=3241 AND Y19_ZVWKTOTAAL<5085) MHK_19 = 2.
+IF (Y19_ZVWKTOTAAL>=5085 AND Y19_ZVWKTOTAAL<7160) MHK_19 = 3.
+IF (Y19_ZVWKTOTAAL>=7160 AND Y19_ZVWKTOTAAL<11359) MHK_19 = 4.
+IF (Y19_ZVWKTOTAAL>=11359 AND Y19_ZVWKTOTAAL<22522) MHK_19 = 5.
+IF (Y19_ZVWKTOTAAL>=22522 AND Y19_ZVWKTOTAAL<43357) MHK_19 = 6.
+IF (Y19_ZVWKTOTAAL>=43357) MHK_19 = 7.
+
+
+IF(Y20_ZVWKTOTAAL<1205) MHK_20 = 0.
+IF (Y20_ZVWKTOTAAL>=1205 AND Y20_ZVWKTOTAAL<3170) MHK_20 = 1.
+IF (Y20_ZVWKTOTAAL>=3170 AND Y20_ZVWKTOTAAL<5038) MHK_20=2.
+IF (Y20_ZVWKTOTAAL>=5038 AND Y20_ZVWKTOTAAL<7136) MHK_20 = 3.  
+IF (Y20_ZVWKTOTAAL>=7136 AND Y20_ZVWKTOTAAL<11498) MHK_20= 4. 
+IF (Y20_ZVWKTOTAAL>=11498 AND Y20_ZVWKTOTAAL<23307) MHK_20= 5. 
+IF (Y20_ZVWKTOTAAL>=23307 AND Y20_ZVWKTOTAAL<45360) MHK_20 = 6.
+IF (Y20_ZVWKTOTAAL>=45360) MHK_20 = 7.
+
+IF(Y21_ZVWKTOTAAL<1375) MHK_21 = 0.
+IF(Y21_ZVWKTOTAAL>=1375 AND Y21_ZVWKTOTAAL<3539) MHK_21 = 1.
+IF (Y21_ZVWKTOTAAL>=3539 AND Y21_ZVWKTOTAAL<5571) MHK_21 = 2.
+IF (Y21_ZVWKTOTAAL>=5571 AND Y21_ZVWKTOTAAL<7949) MHK_21 = 3.
+IF (Y21_ZVWKTOTAAL>=7949 AND Y21_ZVWKTOTAAL<12833) MHK_21 = 4.
+IF (Y21_ZVWKTOTAAL>=12833 AND Y21_ZVWKTOTAAL<26175) MHK_21 = 5.
+IF (Y21_ZVWKTOTAAL>=26175 AND Y21_ZVWKTOTAAL<49924) MHK_21 = 6.
+IF (Y21_ZVWKTOTAAL>=49924) MHK_21 = 7.
+
+IF(Y22_ZVWKTOTAAL<1554) MHK_22 = 0.
+IF(Y22_ZVWKTOTAAL>=1554 AND Y22_ZVWKTOTAAL<4086) MHK_22 = 1.
+IF (Y22_ZVWKTOTAAL>=4086 AND Y22_ZVWKTOTAAL<6443) MHK_22 = 2.
+IF (Y22_ZVWKTOTAAL>=6443 AND Y22_ZVWKTOTAAL<9234) MHK_22 = 3.
+IF (Y22_ZVWKTOTAAL>=9234 AND Y22_ZVWKTOTAAL<14699) MHK_22 = 4.
+IF (Y22_ZVWKTOTAAL>=14699 AND Y22_ZVWKTOTAAL<29701) MHK_22 = 5.
+IF (Y22_ZVWKTOTAAL>=29701 AND Y22_ZVWKTOTAAL<55109) MHK_22 = 6.
+IF (Y22_ZVWKTOTAAL>=55109) MHK_22 = 7.
+
+EXECUTE.
+
+COMPUTE MHK = MIN (MHK_19, MHK_20, MHK_21).
+EXECUTE.
+
+VALUE LABELS 
+MHK_19
+0 'zorgkosten onder 70%'
+1 'zorgkosten in de top 30%'
+2 'zorgkosten in de top 15%'
+3 'zorgkosten in de top 10%'
+4 'zorgkosten in de top 7%'
+5 'zorgkosten in de top 4%'
+6 'zorgkosten in de top 1,5%'
+7 'zorgkosten in de top 0,5%'.
+EXECUTE.
+
+VALUE LABELS 
+MHK_20
+0 'zorgkosten onder 70%'
+1 'zorgkosten in de top 30%'
+2 'zorgkosten in de top 15%'
+3 'zorgkosten in de top 10%'
+4 'zorgkosten in de top 7%'
+5 'zorgkosten in de top 4%'
+6 'zorgkosten in de top 1,5%'
+7 'zorgkosten in de top 0,5%'.
+EXECUTE.
+
+VALUE LABELS 
+MHK_21
+0 'zorgkosten onder 70%'
+1 'zorgkosten in de top 30%'
+2 'zorgkosten in de top 15%'
+3 'zorgkosten in de top 10%'
+4 'zorgkosten in de top 7%'
+5 'zorgkosten in de top 4%'
+6 'zorgkosten in de top 1,5%'
+7 'zorgkosten in de top 0,5%'.
+EXECUTE.
+
+VALUE LABELS 
+MHK_22
+0 'zorgkosten onder 70%'
+1 'zorgkosten in de top 30%'
+2 'zorgkosten in de top 15%'
+3 'zorgkosten in de top 10%'
+4 'zorgkosten in de top 7%'
+5 'zorgkosten in de top 4%'
+6 'zorgkosten in de top 1,5%'
+7 'zorgkosten in de top 0,5%'.
+EXECUTE.
+
+
+COMPUTE MHK1 = MIN (MHK_20, MHK_21, MHK_22).
+EXECUTE.
+
+
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\WOR_TOTAAL.sav".

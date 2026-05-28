@@ -1,0 +1,1144 @@
+* Encoding: windows-1252.
+*DH DATASET OPBOUWEN.
+
+
+GET
+FILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\WoR_cases.sav".
+DATASET NAME WOR_CASES.
+
+GET FILE='G:\Bevolking\GBAADRESOBJECTBUS\GBAADRESOBJECT2024BUSV1.sav'.
+DATASET NAME Adresobject.
+DATASET ACTIVATE WOR_CASES.
+SORT CASES BY RINPERSOON.
+MATCH FILES /FILE='Adresobject' /TABLE='WOR_CASES' /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME WoR_Adres.
+
+
+GET FILE='G:\BouwenWonen\VSLGWBTAB\VSLGWB2025TAB03V1.sav'.
+DATASET NAME GWB.
+DATASET ACTIVATE GWB.
+SORT CASES BY SOORTOBJECTNUMMER RINOBJECTNUMMER.
+DATASET ACTIVATE WoR_Adres.
+SORT CASES BY SOORTOBJECTNUMMER RINOBJECTNUMMER.
+MATCH FILES /FILE='WoR_Adres' /TABLE='GWB' /BY SOORTOBJECTNUMMER RINOBJECTNUMMER.
+EXECUTE.
+DATASET NAME WoR_GWB.
+
+
+* VARIABELEN VERWIJDEREN WAAR WE NIKS MEE DOEN (1999 TM 2024).
+DELETE VARIABLES gem1999
+wc1999
+bc1999
+gem2000
+wc2000
+bc2000
+gem2001
+wc2001
+bc2001
+gem2002
+wc2002
+bc2002
+gem2003
+wc2003
+bc2003
+gem2004
+wc2004
+bc2004
+gem2005
+wc2005
+bc2005
+gem2006
+wc2006
+bc2006
+gem2007
+wc2007
+bc2007
+gem2008
+wc2008
+bc2008
+gem2009
+wc2009
+bc2009
+gem2010
+wc2010
+bc2010
+gem2011
+wc2011
+bc2011
+gem2012
+wc2012
+bc2012
+gem2013
+wc2013
+bc2013
+gem2014
+wc2014
+bc2014
+gem2015
+wc2015
+bc2015
+gem2016
+wc2016
+bc2016
+gem2017
+wc2017
+bc2017
+gem2018
+wc2018
+bc2018
+gem2019
+wc2019
+bc2019
+gem2020
+wc2020
+bc2020
+gem2021
+wc2021
+bc2021
+gem2022
+wc2022
+bc2022
+gem2023
+wc2023
+bc2023
+gem2024
+wc2024
+bc2024.
+EXECUTE.
+
+* numeriek maken van datum adres aanvang/einde --> voor de zekerheid kopieren van kolom.
+COMPUTE Einddatum_adres_Numeric = NUMBER(GBADATUMEINDEADRESHOUDING, F8.0).
+FORMATS Einddatum_adres_Numeric (F8.0).
+EXECUTE.
+
+COMPUTE Begindatum_adres_Numeric=NUMBER(GBADATUMAANVANGADRESHOUDING, F8.0).
+FORMATS Begindatum_adres_Numeric(F8.0).
+EXECUTE.
+
+COMPUTE gem2025_Numeric=NUMBER(gem2025, F4.0).
+EXECUTE.
+
+**selecteren als WoR = 1 of DH.
+USE ALL.
+COMPUTE filter_$=(WoR_cases=1 OR gem2025_Numeric=0518).
+VARIABLE LABELS filter_$ 'WoR_cases=1 OR gem2025_Numeric=518 (FILTER)'.
+VALUE LABELS filter_$ 0 'Not selected' 1 'Selected'.
+FORMATS filter_$ (f1.0).
+FILTER BY filter_$.
+EXECUTE.
+
+SELECT IF filter_$=1.
+EXECUTE.
+
+*Alle mensen selecteren die bij de start van de interventie in DH woonden.
+USE ALL.
+COMPUTE filter_2$=(Einddatum_adres_Numeric > 20220000 AND Begindatum_adres_Numeric<20220000).    
+VARIABLE LABELS filter_2$ 'Einddatum_adres_Numeric > 20220000 and Begindatum_adres_Numeric<20220000 (FILTER)'.
+VALUE LABELS filter_2$ 0 'Not Selected' 1 'Selected'.
+FORMATS filter_2$ (f1.0).
+FILTER BY filter_2$.
+EXECUTE.
+
+SELECT IF filter_2$ = 1.
+EXECUTE. 
+SORT CASES BY RINPersoon(A) Einddatum_adres_Numeric.
+
+*Nu zitten er mogelijk nog dubbelen in van mensen die binnen deze periode meerdere keren zijn verhuisd, dmv aggregate deze mensen samenvoegen tot allemaal uniek cases.
+AGGREGATE
+/OUTFILE=*
+/BREAK=RINPersoon
+/DATUM_MAX=MAX(Einddatum_adres_Numeric).
+DATASET NAME agg.
+
+MATCH FILES /FILE=WoR_GWB
+/TABLE= agg
+/BY RINPersoon.
+EXECUTE.
+
+COMPUTE Keep_adres = 0.
+IF (Einddatum_adres_Numeric=DATUM_MAX) Keep_adres =1.
+EXECUTE.
+SELECT IF Keep_adres = 1.
+EXECUTE. 
+
+DELETE VARIABLES SOORTOBJECTNUMMER
+RINOBJECTNUMMER
+filter_$
+filter_2$
+DATUM_MAX
+Keep_adres.
+EXECUTE.
+
+DATASET NAME DH.
+
+*---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+GET
+  FILE='G:\Bevolking\GBAPERSOONTAB\2024\GBAPERSOON2024TABV3.sav'.
+DATASET NAME GBAPERSOON WINDOW=FRONT.
+*SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE DH.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE GBAPERSOON.
+MATCH FILES /FILE='DH'
+ /TABLE='GBAPERSOON' /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME DH_GBAPERSOON.
+
+DATASET CLOSE GBAPERSOON.
+DATASET CLOSE DH.
+
+* Define Variable Properties.
+ALTER TYPE  GBAGEBOORTEJAAR(F4.0).
+ALTER TYPE  GBAGEBOORTEMAAND(F2.0).
+ALTER TYPE  GBAGEBOORTEDAG(F2.0).
+FORMATS  GBAGEBOORTEJAAR(F4.0).
+FORMATS  GBAGEBOORTEMAAND(F2.0).
+FORMATS  GBAGEBOORTEDAG(F2.0).
+EXECUTE.
+
+*****Voor dit onderzoek wordt alleen naar de volwassen populatie van Den Haag gekeken.
+* Ik wil dat iedereen op 1 januari 2022 18+ is, de rest kan worden verwijderd. Dat betekent dat iedereen met geboortejaar 2004 of later er uit moet.
+
+DATASET ACTIVATE DH_GBAPERSOON.
+USE ALL.
+COMPUTE filter_$=(GBAGEBOORTEJAAR <=  2003).
+VARIABLE LABELS filter_$ 'GebDatum <=  2003 (FILTER)'.
+VALUE LABELS filter_$ 0 'Not Selected' 1 'Selected'.
+FORMATS filter_$ (f1.0).
+FILTER BY filter_$.
+EXECUTE.
+
+
+FILTER OFF.
+USE ALL.
+SELECT IF (GBAGEBOORTEJAAR <= 2003).
+EXECUTE.
+
+* Geboortedatum aanmaken (geboortedag staat standaard op 01).
+COMPUTE GebDatum = DATE.DMY(GBAGEBOORTEDAG, GBAGEBOORTEMAAND, GBAGEBOORTEJAAR).
+VARIABLE LABELS GebDatum 'Geboortedatum (met 01 als standaard geboortedag)'.
+FORMATS  GebDatum(SDATE10).
+EXECUTE. 
+
+
+DELETE VARIABLES GBAGEBOORTELAND
+GBAGEBOORTELANDMOEDER
+GBAGEBOORTELANDVADER
+GBAAANTALOUDERSBUITENLAND
+GBAGENERATIE
+GBAGEBOORTEJAAR
+GBAGEBOORTEMAAND
+GBAGEBOORTEDAG
+GBAGESLACHTMOEDER
+GBAGESLACHTVADER
+GBAGEBOORTEJAARMOEDER
+GBAGEBOORTEMAANDMOEDER
+GBAGEBOORTEDAGMOEDER
+GBAGEBOORTEJAARVADER
+GBAGEBOORTEMAANDVADER
+GBAGEBOORTEDAGVADER
+GBAIMPUTATIECODE
+GBAGEBOORTELANDNL
+GBAHERKOMSTLAND
+filter_$.
+EXECUTE. 
+
+RENAME VARIABLES (GBAHERKOMSTGROEPERING = LAND).
+EXECUTE. 
+
+
+GET FILE='K:\Utilities\Code_Listings\SSBreferentiebestanden\LANDAKTUEELREFV13.SAV'.
+DATASET NAME LandAktueel.
+DATASET ACTIVATE DH_GBAPERSOON.
+SORT CASES BY LAND.
+DATASET ACTIVATE LandAktueel.
+SORT CASES BY LAND.
+DATASET ACTIVATE DH_GBAPERSOON.
+MATCH FILES /FILE=*
+  /TABLE='LandAktueel'
+  /BY LAND.
+EXECUTE.
+
+
+STRING Migratieachtergrond (A50).
+COMPUTE Migratieachtergrond = LANDACHTDELING.
+VARIABLE LABELS Migratieachtergrond 'Migratieachtergrond gebaseerd op CBS 8-deling plus extra categorie Midden- en Oost-Europa'.
+RECODE Migratieachtergrond ('-'='-')('1'='1') ('2'='3')('3'='4')('4'='5')('5'='6')('6'='7')('7'='8')('8'='9').
+EXECUTE. 
+VALUE LABELS Migratieachtergrond
+'-' 'Onbekend' 
+'1' 'Nederland'
+'2' 'Midden- en Oost-Europa'
+'3' 'Overig Europa'
+'4' 'Turkije'
+'5' 'Marokko'
+'6' 'Suriname'
+'7' 'Nederlands-Caribisch gebied'
+'8' 'Indonesi '
+'9' 'Overig Afrika, Azi , Amerika en Oceani '.
+EXECUTE. 
+
+IF (LANDACHTDELING EQ '2' AND LANDAKTUEEL12 EQ '2') Migratieachtergrond = '2'.
+EXECUTE. 
+
+DELETE VARIABLES WERELDDEEL
+LANDTYPE
+LANDAKTUEEL
+LANDAKTUEEL2
+LANDAKTUEEL3
+LANDAKTUEEL4
+LANDAKTUEEL5
+ETNGRP
+LANDAKTUEEL7
+LANDAKTUEEL8
+LANDAKTUEEL9
+LANDAKTUEEL10
+LANDAKTUEEL11
+LANDAKTUEELACHTERSTANDBO
+LANDAKTUEELCN
+LANDAKTUEEL12
+LANDAKTUEEL13
+WERELDDEEL2
+LANDTIENDELING
+LANDDRIEDELING
+LANDACHTDELING
+LANDINDELING20.
+EXECUTE. 
+
+
+DATASET CLOSE LandAktueel. 
+
+DATASET NAME DH_GBAPERSOON.
+
+
+****INKOMEN EN VERMOGEN*****
+
+*2022.
+GET FILE='G:\InkomenBestedingen\INHATAB\INHA2022TABV2.sav'.
+DATASET NAME Inkomenhuishouden2022.
+
+
+DATASET ACTIVATE Inkomenhuishouden2022.
+GET FILE='G:\InkomenBestedingen\INHATAB\KOPPELPERSOONHUISHOUDEN2022V2.sav'.
+DATASET NAME Koppelpersoonshuishouden2022.
+DATASET ACTIVATE Inkomenhuishouden2022.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Koppelpersoonshuishouden2022.
+SORT CASES BY RINPERSOONSHKW RINPERSOONHKW.
+DATASET ACTIVATE Inkomenhuishouden2022.
+MATCH FILES /FILE='Koppelpersoonshuishouden2022' /TABLE='Inkomenhuishouden2022' /BY RINPERSOONSHKW RINPERSOONHKW.
+EXECUTE.
+DATASET NAME Tussenbestand2022.
+DATASET CLOSE Koppelpersoonshuishouden2022.
+
+
+
+
+DATASET ACTIVATE DH_GBAPERSOON.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE Tussenbestand2022.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE DH_GBAPERSOON.
+MATCH FILES /FILE=DH_GBAPERSOON
+  /Table='Tussenbestand2022'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+DATASET CLOSE Inkomenhuishouden2022.
+DATASET CLOSE Tussenbestand2022.
+
+
+
+DELETE VARIABLES
+INHAHLMI
+INHARMEUR
+INHARMEURL
+INHARMLAG
+INHARMLAGL
+INHARMSOC
+INHARMSOCL
+INHBBIHJ
+INHBELIH
+INHBESTINKH
+INHBRUTINKH
+INHGESTINKH
+INHP100HBEST
+INHP100HBESTES
+INHP100HBRUT
+INHP100HGEST
+INHP100HPRIM
+INHPOPIIV
+INHPRIMINKH
+INHSAMAOW
+INHSAMHH
+INHUAF.
+EXECUTE.
+
+
+ALTER TYPE  INHUAFTYP(F3.0).
+FORMATS  INHUAFTYP(F3.0).
+EXECUTE.
+
+ALTER TYPE  INHEHALGR(F3.0).
+FORMATS  INHEHALGR(F3.0).
+EXECUTE.
+
+
+RENAME VARIABLES (INHAHL INHEHALGR 
+INHP100HGESTES INHUAFL INHUAFTYP= Y22_INHAHL Y22_INHEHALGR
+Y22_INHP100HGESTES Y22_INHUAFL Y22_INHUAFTYP).
+EXECUTE. 
+
+
+RECODE Y22_INHUAFL (-4=0) (-2=0) (-1=0) (0=0) (1 thru 10=1) (10 thru 20=2) (20 thru 30=3) (30 thru 40=4) (40 thru 50=5) (50 thru HIGHEST=6) INTO Y22_Uitkeringsafhankelijkheid.
+apply dictionary from */source variables = Y22_INHUAFL /target variables = Y22_Uitkeringsafhankelijkheid.
+VALUE LABELS Y22_Uitkeringsafhankelijkheid
+0 'Geen uitkering'
+1 '0 tot 10% Uitkering' 
+2 '10 tot 20% Uitkering' 
+3 '20 tot 30% uitkering'
+4 '30 tot 40% uikering'
+5 '40 tot 50% uitkering'
+6 '50% of meer uitkering'. 
+EXECUTE.
+
+
+RECODE Y22_INHEHALGR (1=1) (2=2) (3=3) (8=4) (9=5) (SYSMIS=5) INTO Y22_Woningbezit.
+apply dictionary from */source variables = Y22_INHEHALGR /target variables = Y22_Woningbezit.
+VALUE LABELS Y22_Woningbezit
+1 'Eigen woning' 
+2 'Huur woning zonder toeslag' 
+3 'Huur woning met toeslag'
+4 'Institutioneel huishouden'
+5 'Onbekend'. 
+EXECUTE.
+
+RECODE Y22_INHUAFTYP (0=0) (1=1) (2=2) (3=3) (4=4) (8=5) (9=6) INTO Y22_SoortUitkering.
+apply dictionary from */source variables = Y22_INHUAFTYP /target variables = Y22_SoortUitkering.
+VALUE LABELS Y22_SoortUitkering
+0 'Geen uitkering'
+1 'Werkloosheidsuitkering' 
+2 'Arbeidsongeschiktheidsuitkering' 
+3 'Bijstandsuitkering'
+4 'Uitkering overige sociale voorziening'
+5 'Institutioneel huishouden'
+6 'Particulier huishouden met onbekend inkomen'.
+EXECUTE.
+
+
+DELETE VARIABLES
+Y22_INHEHALGR
+Y22_INHUAFTYP
+RINPERSOONSHKW
+RINPERSOONHKW. 
+EXECUTE.
+
+
+RECODE Y22_INHP100HGESTES (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y22_INHP100GESTES_class.
+apply dictionary from */source variables = Y22_INHP100HGESTES /target variables = Y22_INHP100GESTES_class.
+VALUE LABELS Y22_INHP100GESTES_class
+-3 'Particulier studentenhuishouden'
+-2 'Institutioneel huishouden'
+-1 'Particulier huishouden met een onbekend inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+DATASET NAME DH_INH.
+
+**INPATAB.
+*Nu op persoonsniveau het inkomen koppelen en de toegevoegde variabelen schonen.
+
+*2022.
+GET File="G:\InkomenBestedingen\INPATAB\INPA2022TABV3.sav".
+DATASET NAME INPATAB2022.
+DATASET ACTIVATE DH_INH.
+*SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INPATAB2022.
+*SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE DH_INH.
+MATCH FILES /FILE=DH_INH
+  /Table='INPATAB2022'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+DELETE VARIABLES 
+RINPERSOONSHKW
+RINPERSOONHKW
+INPAINV3400P
+INPAMEE4420P
+INPAMKB2078P
+INPASAR2076P
+INPASPE2072P
+INPASTA2074P
+INPAVBV2079P
+INPAVWI6110P
+INPAZLF4240P
+INPBELI
+INPEMEZ
+INPEMFO
+INPIMPINK
+INPIMPZELF
+INPKKCODE
+INPKKGEM
+INPKKMUT
+INPP100PPRIM
+INPPERSBRUT
+INPPERSINK
+INPPERSPRIM
+INPPG410WW
+INPPG610WAO
+INPPG710PEN
+INPPG810ZFW
+INPPH570ZWP
+INPPH670AOP
+INPPH770OUP
+INPPH780OUV
+INPPH790LLP
+INPPH865ZFW
+INPPH868ZTS
+INPPH880ZKV
+INPPI440WW
+INPPI640WAO
+INPPI840ZFW
+INPPINK
+INPPN400WW
+INPPN700PEN
+INPPN800ZFW
+INPPO830ZFW
+INPPOSHHK
+INPPS850ZFW
+INPPV420WW
+INPPV820ZFW
+INPPZ860ZFW
+INPSBIDGA2008VJJJJ
+INPSBIMEE2008VJJJJ
+INPSBIOVE2008VJJJJ
+INPSBIZLF2008VJJJJ
+INPSZHVZLFGEMJJJJ
+INPT1000WER
+INPT1020AMB
+INPT1030DGN
+INPT1040NAT
+INPT1060OVE
+INPT1068ZVW
+INPT2070WIN
+INPT3080REN
+INPT3100OBL
+INPT3110DAB
+INPT3120DIV
+INPT3140HEW
+INPT3150ONG
+INPT3160OVB
+INPT3170RBW
+INPT3180RST
+INPT3190RBS
+INPT5210WW
+INPT5220WA
+INPT5230ZW
+INPT5240AO
+INPT5250AOP
+INPT5260AOW
+INPT5270AWW
+INPT5280PEN
+INPT5288ZVW
+INPT5290LLP
+INPT6290ABW
+INPT6300DIV
+INPT6318ZVW
+INPT6320KB
+INPT6325KGB
+INPT6330STU
+INPT7340HRS
+INPT7350REW
+INPT7360TSK
+INPT8370ONT
+INPTYPDGA
+INPTYPMEE
+INPTYPOVE
+INPTYPZLF
+INPV0390BET
+INPV3900INK
+INPYBIT2410P
+INPYBIV2420P.
+
+RENAME VARIABLES (INPP100PBRUT
+INPSECJ INPP100PPERS = Y22_INPP100PBRUT
+Y22_INPSECJ Y22_INPP100PPERS).
+EXECUTE. 
+
+DATASET CLOSE INPATAB2022.
+
+RECODE Y22_INPP100PBRUT (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y22_INPP100PBRUT_class.
+apply dictionary from */source variables = Y22_INPP100PBRUT /target variables = Y22_INPP100PBRUT_class.
+VALUE LABELS Y22_INPP100PBRUT_class
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE.
+
+RECODE Y22_INPP100PPERS (1 thru 33 = 1) (34 thru 67 = 2) (68 thru 100 = 3) (else = copy) into Y22_INPP100PPERS_class.
+apply dictionary from */source variables = Y22_INPP100PPERS /target variables = Y22_INPP100PPERS_class.
+VALUE LABELS Y22_INPP100PPERS_class 
+-3 'Personen in institutionele huishoudens'
+-2 'Personen in particuliere huishoudens zonder waargenomen inkomen'
+-1 'Personen zonder persoonlijk inkomen'
+1 'Low' 
+2 'Moderate' 
+3 'High'.
+EXECUTE. 
+
+ SAVE OUTFILE='H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\PSM\Tussenbestanden\DH_GBA_INKOMEN.sav'
+  /COMPRESSED.
+DATASET NAME DH_INKOMEN.
+
+
+************************************************Schuldsanering toevoegen***************************************************************
+Voor deze groep alleen het jaar 2022 toevoegen.
+
+
+GET
+  FILE='G:\VeiligheidRecht\WSNPPERSBUS\WSNPPERSBUS2023V1.sav'.
+DATASET NAME SCHULD.
+
+DELETE VARIABLES Wsnprbnk
+Wsnpsrtbeein
+Wsnpbewid.
+EXECUTE. 
+
+* Define Variable Properties.
+ALTER TYPE  Wsnpdatumtoelaat(SDATE10).
+ALTER TYPE  Wsnpdatumbeein(SDATE10).
+FORMATS  Wsnpdatumtoelaat(SDATE10).
+FORMATS  Wsnpdatumbeein(SDATE10).
+EXECUTE.
+
+
+* 2022.
+COMPUTE Y22_Gewenste_Toelaatdatum = DATE.DMY(31,12,2022).
+COMPUTE Y22_Gewenste_Beeindigdatum = DATE.DMY(01,01,2022).
+FORMATS Y22_Gewenste_Toelaatdatum (SDATE10).
+FORMATS Y22_Gewenste_Beeindigdatum (SDATE10).
+EXECUTE. 
+
+IF (Wsnpdatumtoelaat LE Y22_Gewenste_Toelaatdatum AND Wsnpdatumbeein GE Y22_Gewenste_Beeindigdatum) Y22_Schuldsanering = 1.
+EXECUTE. 
+
+DELETE VARIABLES Y22_Gewenste_Toelaatdatum Y22_Gewenste_Beeindigdatum.
+EXECUTE. 
+
+FORMATS  Y22_Schuldsanering (F1.0).
+VARIABLE WIDTH  Y22_Schuldsanering (4).
+VARIABLE LABELS Y22_Schuldsanering 'Persoon zat in 2022 in een schuldsaneringstraject'.
+
+
+DELETE VARIABLES Wsnpdatumtoelaat
+Wsnpdatumbeein.
+EXECUTE. 
+
+
+* Het is mogelijk dat mensen terugkeren in de schuldsanering, deze worden dan als nieuwe cases toegevoegd, er zitten dan duplicates in. 
+* Identify Duplicate Cases.
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+SELECT IF PrimaryLast = 1.
+EXECUTE.
+
+DELETE VARIABLES PrimaryLast.
+EXECUTE. 
+
+*Koppelen aan hoofdbestand.
+DATASET ACTIVATE DH_INKOMEN.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE SCHULD.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE DH_INKOMEN.
+MATCH FILES /FILE=DH_INKOMEN
+  /TABLE='SCHULD'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+RECODE Y22_Schuldsanering  (1=1) (SYSMIS=0).
+VALUE LABELS Y22_Schuldsanering 0 'Nee' 1 'Ja'.
+EXECUTE. 
+
+DATASET NAME INK_SCHULD.
+DATASET CLOSE SCHULD.
+DATASET CLOSE DH_INKOMEN.
+
+
+************************wanbetaler zorgverzekering (indicatie voor schulden)*************************
+
+GET FILE='G:\GezondheidWelzijn\WANBZVWTAB\2022\WANBZVW2022TABV1.sav'.
+DATASET NAME WANB.
+
+COMPUTE Y22_WanbetalerZorgver = 1.
+VARIABLE LABELS Y22_WanbetalerZorgver 'Persoon geregistreerd als wanbetaler zorgverzekering'.
+FORMATS Y22_WanbetalerZorgver (F1.0).
+VALUE LABELS Y22_WanbetalerZorgver 1 'Ja'.
+EXECUTE. 
+
+DATASET ACTIVATE INK_SCHULD.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WANB.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE INK_SCHULD.
+MATCH FILES /FILE=*
+  /TABLE='WANB'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME SCHULD_WANB.
+
+
+RECODE Y22_WanbetalerZorgver (1=1) (SYSMIS=0).
+VALUE LABELS Y22_WanbetalerZorgver 0 'Nee' 1 'Ja'.
+EXECUTE. 
+
+DATASET CLOSE WANB.
+
+SAVE OUTFILE = 'H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\PSM\Tussenbestanden\DH_GBA_INKOMEN_SCHULD.sav'.
+
+
+
+
+
+*****************ZORGKOSTEN TOEVOEGEN*********************************
+
+DATASET NAME DH.
+
+GET FILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\zorgkosten.sav".
+DATASET NAME ZORGKOSTEN.
+
+DATASET ACTIVATE DH.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE ZORGKOSTEN.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE DH.
+MATCH FILES /FILE=*
+/TABLE ='ZORGKOSTEN'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+DATASET NAME DH_ZORGKOSTEN.
+
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\DH_FIN_ZORGK.sav".
+
+
+
+************************************WMO KOSTEN TOEVOEGEN******************************
+
+
+
+GET FILE = 'H:\Datavoorbereiding\NWA\Roos\20240523_kostenwmo_2019_2020_2021_2022_2023_gemeenteDenHaag_Upload_2024.sav'.
+DATASET NAME WMO19_23 WINDOW=FRONT.
+
+*stap 1: maakt iemand gebruik van WMO?.
+COMPUTE Y19_WMO = 0. 
+EXECUTE.
+IF (jaar = 2019) Y19_WMO = 1.
+EXECUTE.
+
+COMPUTE Y20_WMO = 0.
+EXECUTE.
+IF (jaar = 2020) Y20_WMO = 1.
+EXECUTE.
+
+
+COMPUTE Y21_WMO = 0.
+EXECUTE.
+IF (jaar = 2021) Y21_WMO = 1.
+EXECUTE.
+
+COMPUTE Y22_WMO = 0.
+EXECUTE.
+IF (jaar = 2022) Y22_WMO = 1.
+EXECUTE.
+
+
+COMPUTE Y23_WMO = 0.
+EXECUTE.
+IF (jaar = 2023) Y23_WMO = 1.
+EXECUTE.
+
+** stap 2: Ook totale wmo kosten wil ik uiteindelijk weten.  
+DATASET ACTIVATE WMO19_23.
+
+DO IF jaar = 2019. 
+COMPUTE Y19_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y19_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DO IF jaar = 2020. 
+COMPUTE Y20_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y20_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DO IF jaar = 2021. 
+COMPUTE Y21_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y21_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DO IF jaar = 2022. 
+COMPUTE Y22_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y22_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DO IF jaar = 2023. 
+COMPUTE Y23_WMO_KOSTEN = Wmo_totaal.
+else. 
+COMPUTE Y23_WMO_KOSTEN = 0.
+END IF.
+EXECUTE.
+
+DELETE VARIABLES
+VV_totaal
+Woon_totaal
+HH
+Begeleiding_dagbesteding
+Beschermd_wonen_Opvang
+jaar
+Wmo_totaal.
+EXECUTE.
+
+
+
+AGGREGATE
+  /OUTFILE=* MODE=ADDVARIABLES
+  /BREAK=RINPERSOONS RINPERSOON
+  /Y19_WMO_max=MAX(Y19_WMO) 
+  /Y20_WMO_max=MAX(Y20_WMO) 
+  /Y21_WMO_max=MAX(Y21_WMO)
+  /Y22_WMO_max=MAX(Y22_WMO) 
+  /Y23_WMO_max=MAX(Y23_WMO) 
+  /Y19_WMO_KOSTEN_max=MAX(Y19_WMO_KOSTEN)
+  /Y20_WMO_KOSTEN_max=MAX(Y20_WMO_KOSTEN)
+  /Y21_WMO_KOSTEN_max=MAX(Y21_WMO_KOSTEN)
+  /Y22_WMO_KOSTEN_max=MAX(Y22_WMO_KOSTEN)
+  /Y23_WMO_KOSTEN_max=MAX(Y23_WMO_KOSTEN).
+
+DELETE VARIABLES 
+Y19_WMO
+Y20_WMO
+Y21_WMO
+Y22_WMO
+Y23_WMO
+Y19_WMO_KOSTEN
+Y20_WMO_KOSTEN
+Y21_WMO_KOSTEN
+Y22_WMO_KOSTEN
+Y23_WMO_KOSTEN.
+EXECUTE. 
+
+
+RENAME VARIABLES 
+(Y19_WMO_max 
+Y20_WMO_max 
+Y21_WMO_max 
+Y22_WMO_max 
+Y23_WMO_max 
+Y19_WMO_KOSTEN_max
+Y20_WMO_KOSTEN_max
+Y21_WMO_KOSTEN_max
+Y22_WMO_KOSTEN_max
+Y23_WMO_KOSTEN_max= 
+Y19_WMO
+Y20_WMO
+Y21_WMO
+Y22_WMO
+Y23_WMO
+Y19_WMO_KOSTEN
+Y20_WMO_KOSTEN
+Y21_WMO_KOSTEN
+Y22_WMO_KOSTEN
+Y23_WMO_KOSTEN).
+EXECUTE.
+
+
+
+DATASET ACTIVATE WMO19_23.
+* Identify Duplicate Cases.
+SORT CASES BY RINPERSOONS(A) RINPERSOON(A).
+MATCH FILES
+  /FILE=*
+  /BY RINPERSOONS RINPERSOON
+  /FIRST=PrimaryFirst
+  /LAST=PrimaryLast.
+DO IF (PrimaryFirst).
+COMPUTE  MatchSequence=1-PrimaryLast.
+ELSE.
+COMPUTE  MatchSequence=MatchSequence+1.
+END IF.
+LEAVE  MatchSequence.
+FORMATS  MatchSequence (f7).
+COMPUTE  InDupGrp=MatchSequence>0.
+SORT CASES InDupGrp(D).
+MATCH FILES
+  /FILE=*
+  /DROP=PrimaryFirst InDupGrp MatchSequence.
+VARIABLE LABELS  PrimaryLast 'Indicator of each last matching case as Primary'.
+VALUE LABELS  PrimaryLast 0 'Duplicate Case' 1 'Primary Case'.
+VARIABLE LEVEL  PrimaryLast (ORDINAL).
+FREQUENCIES VARIABLES=PrimaryLast.
+EXECUTE.
+
+
+*Select one of  case for all duplicate cases and delete the others.
+FILTER OFF.
+USE ALL.
+SELECT IF (PrimaryLast=1).
+EXECUTE.
+
+DELETE VARIABLES
+PrimaryLast.
+EXECUTE.
+
+
+
+*** LAATSTE STAP: koppelen van deze WMO dataset aan de grote dataset.
+
+
+DATASET ACTIVATE DH_ZORGKOSTEN.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE WMO19_23.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE DH_ZORGKOSTEN.
+MATCH FILES /FILE=*
+  /TABLE='WMO19_23'
+  /BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+RECODE Y19_WMO Y20_WMO Y21_WMO Y22_WMO Y23_WMO (1=1) (SYSMIS=0).
+VALUE LABELS Y19_WMO Y20_WMO Y21_WMO Y22_WMO Y23_WMO 0 'Nee' 1 'Ja'.
+EXECUTE.
+
+RECODE Y19_WMO_KOSTEN Y20_WMO_KOSTEN Y21_WMO_KOSTEN Y22_WMO_KOSTEN Y23_WMO_KOSTEN (SYSMIS=0) (ELSE=COPY).
+EXECUTE.
+
+SAVE OUTFILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\PSM\Tussenbestanden\DH_FIN_ZORGK_WMO.sav".
+
+DATASET NAME DH.
+
+*********************************POLYFARMACIE TOEVOEGEN****************************************************************
+
+GET FILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\Tussenbestanden\MED19_23.sav".
+DATASET NAME MED19_23.
+
+DATASET ACTIVATE DH.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE MED19_23.
+SORT CASES BY RINPERSOONS RINPERSOON.
+DATASET ACTIVATE DH.
+MATCH FILES /FILE=*
+/TABLE='MED19_23'
+/BY RINPERSOONS RINPERSOON.
+EXECUTE.
+
+
+
+SAVE OUTFILE = "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\PSM\DH_TOTAAL.sav".
+
+
+*********************************************************************************************************************************************************
+******************************************************************DATA BEWERKEN*****************************************************************************************
+***************************************************************************************************************************************************************************************************************
+
+*Syntax databewerkingen na alle koppelingen.
+
+GET FILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\DH_TOTAAL.sav".
+DATASET NAME DH.
+
+** leeftijdscategorien maken (zowel in de DH dataset als de WoR dataset).
+
+DATASET ACTIVATE DH.
+FORMATS GebDatum (ADATE10).
+COMPUTE agegroup = 0.
+EXECUTE.
+IF(GebDatum < DATE.MDY(01,01,1942)) agegroup= 1.
+IF(GebDatum >= DATE.MDY(01,01,1942) AND GebDatum <  DATE.MDY(01,01,1962)) agegroup = 2.
+IF(GebDatum >= DATE.MDY(01,01,1962) AND GebDatum < DATE.MDY(01,01,1982)) agegroup = 3.
+IF(GebDatum >= DATE.MDY(01,01,1982)) agegroup= 4.
+EXECUTE.
+
+VALUE LABELS
+agegroup
+1 '81+'
+2 '61-80'
+3 '41-60'
+4 '40-'.
+EXECUTE.
+
+
+** van deze data wil ik ook graag de leeftijd maken op 1 januari 2022.
+
+DATASET ACTIVATE DH.
+COMPUTE Age_2022 = (DATE.MDY(01,01,2022) - GebDatum)/(365.25*24*60*60).
+EXECUTE.
+COMPUTE Age_2022 = TRUNC(Age_2022).
+EXECUTE.
+
+
+**Institutioneel huishouden niet meenemen.
+SELECT IF (Y22_Woningbezit ~=4).
+EXECUTE.
+
+**Schulden en wanbetalers --> missing is nee.
+DATASET ACTIVATE DH. 
+
+RECODE Y22_Schuldsanering  (1=1) (SYSMIS=0).
+VALUE LABELS Y22_Schuldsanering 0 'Nee' 1 'Ja'.
+EXECUTE. 
+
+
+
+RECODE Y22_WanbetalerZorgver (1=1) (SYSMIS=0).
+VALUE LABELS Y22_WanbetalerZorgver 0 'Nee' 1 'Ja'.
+EXECUTE. 
+
+RECODE WoR_cases (1=1) (SYSMIS=0).
+EXECUTE.
+
+*** Datum intake welzijn--> jaar intake variabele aanmaken.
+** De nieuwe upload heeft dit al in het bestand zitten dus is dit niet meer nodig (check updates in het vervolg, anders kan onderstaande gebruikt worden).
+ * DATASET ACTIVATE WoR.
+ * FORMATS Datumintakewelzijn (ADATE10).
+ * COMPUTE Jaar_intake_welzijn = 0.
+ * EXECUTE.
+ * IF(Datumintakewelzijn >= DATE.MDY(01,01,2022) AND Datumintakewelzijn < DATE.MDY(01,01,2023)) Jaar_intake_welzijn= 2022.
+ * IF(Datumintakewelzijn >= DATE.MDY(01,01,2023) AND Datumintakewelzijn <  DATE.MDY(01,01,2024)) Jaar_intake_welzijn = 2023.
+ * IF(Datumintakewelzijn >= DATE.MDY(01,01,2024) AND Datumintakewelzijn < DATE.MDY(01,01,2025)) Jaar_intake_welzijn = 2024.
+ * IF(Datumintakewelzijn >= DATE.MDY(01,01,2025) AND Datumintakewelzijn < DATE.MDY(01,01,2026)) Jaar_intake_welzijn= 2025.
+ * EXECUTE.
+
+
+
+
+*************************************************************** Chronische ziekte proxy*****************************************************************************
+* de variabele kosten van multidisciplinaire zorg binnen de basisverzekering is een proxy voor chronische aandoeningen. 
+*Deze zorgvorm betreft namelijk zorgverlening aan patienten met een chronische aandoening waarbij zorgaanbieders van diverse disciplines in onderlinge samenhang zorg verlenen, waarvan huisartsenzorg geen onderdeel is.
+*Deze zorgvorm is van toepassing voor een viertal chronische patientgroepen: 
+* Diabetes melitus type 2 (DM2)
+* Vasculair risicomanagement (VRM)
+* COPD
+*Astma
+*--> Ook omschrijven als binaire variabele.
+
+
+DATASET ACTIVATE DH.
+
+COMPUTE Y19_Chronischziek = 0.
+EXECUTE.
+IF (Y19_ZVWKMULTIDISC>0) Y19_Chronischziek = 1.
+EXECUTE.
+
+COMPUTE Y20_Chronischziek = 0.
+EXECUTE.
+IF (Y20_ZVWKMULTIDISC>0) Y20_Chronischziek = 1.
+EXECUTE.
+
+COMPUTE Y21_Chronischziek = 0.
+EXECUTE.
+IF (Y21_ZVWKMULTIDISC>0) Y21_Chronischziek = 1.
+EXECUTE.
+
+COMPUTE Y22_Chronischziek = 0.
+EXECUTE.
+IF (Y22_ZVWKMULTIDISC>0) Y22_Chronischziek = 1.
+EXECUTE.
+
+**************
+
+
+DATASET ACTIVATE DH.
+SAVE OUTFILE "H:\Datavoorbereiding\NWA\Roos\WoR_juli_2025\PSM\DH_TOTAAL.sav".
+
+
+
+RECODE Age_2022
+(LOWEST THRU 35 = 1)
+(36 THRU 50 = 2)
+(51 THRU 65 = 3)
+(66 THRU 80 = 4)
+(81 THRU HIGHEST = 5)
+INTO AGE_Categorized.
+EXECUTE.
+
+VARIABLE LABELS AGE_Categorized "Age in categories".
+VALUE LABELS AGE_Categorized
+1 '35-'
+2 '36-50'
+3 '51-65'
+4 '66-80'
+5 '80+'.
+RECODE Y22_INHAHL
+(1 = 1)
+(2= 2)
+(3 THRU HIGHEST = 3)
+INTO Y22_INHAHL_Categorized.
+EXECUTE.
+
+VARIABLE LABELS Y22_INHAHL_Categorized "aantal personen in huishouden - gecategoriseerd".
+VALUE LABELS Y22_INHAHL_Categorized
+1 '1'
+2 '2'
+3 '3 of meer'.
+
+RECODE Migratieachtergrond (1=1) (2 THRU 9=2)  into Migratieachtergrond_dummy.
+EXECUTE.
+ 
+VARIABLE LABELS Migratieachtergrond_dummy "Migratieachtergrond - gecategoriseerd".
+VALUE LABELS Migratieachtergrond_dummy
+1 'Nederland'
+2 'Niet Nederland'.
+
+
+NUMERIC Y22_INPSECJ_cat (F1.0).
+IF (Y22_INPSECJ = "11" OR Y22_INPSECJ = "12" OR Y22_INPSECJ = "13" OR Y22_INPSECJ = "14" OR Y22_INPSECJ = "15")  Y22_INPSECJ_cat = 1.
+IF (Y22_INPSECJ = "25") Y22_INPSECJ_cat = 2.
+IF (Y22_INPSECJ = "21" OR Y22_INPSECJ= "22" OR Y22_INPSECJ= "23" OR Y22_INPSECJ= "24") Y22_INPSECJ_cat = 3.
+IF (Y22_INPSECJ = "26" OR Y22_INPSECJ = "31" OR Y22_INPSECJ = "32" OR Y22_INPSECJ = "99") Y22_INPSECJ_cat = 4.
+EXECUTE.
+
+VARIABLE LABELS Y22_INPSECJ_cat "Sociaaleconomische categorie op jaarbasis - gegroepeerd".
+VALUE LABELS Y22_INPSECJ_cat
+1 'Werkend'
+2 'Ontvanger pensioen uitkering'
+3 'Ontvanger overige uitkering'
+4 'Overig'.
+
